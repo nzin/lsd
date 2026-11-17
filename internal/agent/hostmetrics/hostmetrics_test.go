@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func near(a, b float64) bool { return math.Abs(a-b) < 1e-6 }
@@ -54,6 +55,35 @@ func TestWorkingSetExcludesInactiveCache(t *testing.T) {
 	// never underflows if the counters are read at slightly different moments
 	if got := (cgroupSnapshot{memCurrent: 100, memInactiveFile: 400}).workingSet(); got != 0 {
 		t.Fatalf("working set = %d, want 0", got)
+	}
+}
+
+// The root cgroup (a container whose init is systemd, for one) has cpu.stat but no memory files: the collector
+// must keep the host's memory and swap figures instead of reporting zero.
+func TestCgroupScopeKeepsHostMemoryWhenTheCgroupHasNone(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "cpu.stat"), []byte("usage_usec 1\nuser_usec 1\nsystem_usec 0\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("LSD_CGROUP_ROOT", dir)
+	s, err := newCgroupReader().snapshot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.memKnown || s.swapKnown {
+		t.Fatalf("no memory files, yet memKnown=%v swapKnown=%v", s.memKnown, s.swapKnown)
+	}
+
+	c := New(ScopeCgroup)
+	if !c.UsingCgroup() {
+		t.Fatal("cgroup scope should be active (cpu.stat is readable)")
+	}
+	host, _, _, err := c.Collect(time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if host.MemTotal == 0 || host.MemUsed == 0 {
+		t.Fatalf("memory fell back to zero: total=%d used=%d", host.MemTotal, host.MemUsed)
 	}
 }
 

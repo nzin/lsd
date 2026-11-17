@@ -92,16 +92,21 @@ func (c *Collector) Collect(now time.Time) (*pb.HostSample, []*pb.DiskSample, []
 			cgDiskWI = rate(c.lastCG.wios, snap.wios, elapsed)
 		}
 		c.lastCG = snap
-		// Memory: the container's usage against its limit (or host total).
-		host.MemUsed = snap.workingSet() // not memory.current: that includes reclaimable page cache
-		host.MemCached = snap.memFile
-		if snap.memMax > 0 && (host.MemTotal == 0 || snap.memMax < host.MemTotal) {
-			host.MemTotal = snap.memMax
+		// Memory: the container's usage against its limit (or host total). When the cgroup has no memory
+		// files (the root cgroup, e.g. a container that runs systemd as its init) the host figures stay.
+		if snap.memKnown {
+			host.MemUsed = snap.workingSet() // not memory.current: that includes reclaimable page cache
+			host.MemCached = snap.memFile
+			if snap.memMax > 0 && (host.MemTotal == 0 || snap.memMax < host.MemTotal) {
+				host.MemTotal = snap.memMax
+			}
 		}
 		// Swap is likewise the container's own (the host-wide figure would be misleading).
-		host.SwapUsed = snap.swapCurrent
-		if snap.swapMax > 0 {
-			host.SwapTotal = snap.swapMax
+		if snap.swapKnown {
+			host.SwapUsed = snap.swapCurrent
+			if snap.swapMax > 0 {
+				host.SwapTotal = snap.swapMax
+			}
 		}
 	} else if ts, err := cpu.Times(false); err == nil && len(ts) == 1 {
 		t := ts[0]

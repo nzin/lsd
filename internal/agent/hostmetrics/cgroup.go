@@ -97,6 +97,7 @@ type cgroupSnapshot struct {
 	memCurrent, memMax, memFile        uint64
 	memInactiveFile                    uint64 // reclaimable page cache
 	swapCurrent, swapMax               uint64
+	memKnown, swapKnown                bool // memory.current / memory.swap.current exist (the root cgroup has neither)
 	rbytes, wbytes, rios, wios         uint64
 }
 
@@ -113,12 +114,14 @@ func (c *cgroupReader) snapshot() (cgroupSnapshot, error) {
 	}
 	if v, err := c.read("memory.current"); err == nil {
 		s.memCurrent, _ = strconv.ParseUint(strings.TrimSpace(v), 10, 64)
+		s.memKnown = true
 	}
 	if v, err := c.read("memory.max"); err == nil {
 		s.memMax, _ = strconv.ParseUint(strings.TrimSpace(v), 10, 64) // "max" -> 0
 	}
 	if v, err := c.read("memory.swap.current"); err == nil {
 		s.swapCurrent, _ = strconv.ParseUint(strings.TrimSpace(v), 10, 64)
+		s.swapKnown = true
 	}
 	if v, err := c.read("memory.swap.max"); err == nil {
 		s.swapMax, _ = strconv.ParseUint(strings.TrimSpace(v), 10, 64) // "max" -> 0
