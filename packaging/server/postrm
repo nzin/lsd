@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+if [ -d /run/systemd/system ]; then
+    systemctl daemon-reload || true
+fi
+# The stored metrics (/var/lib/simplemonitor-server) and the 'simplemonitor' user are
+# deliberately kept, even on purge. Remove them by hand if you really want to.
+exit 0

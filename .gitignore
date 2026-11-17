@@ -1,0 +1,7 @@
+.DS_Store
+/bin/
+/dist/
+/data/
+web/node_modules/
+web/dist/*
+!web/dist/.gitkeep

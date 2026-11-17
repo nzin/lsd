@@ -1,0 +1,14 @@
+Package: simplemonitor-agent
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: simplemonitor <root@localhost>
+Installed-Size: @SIZE@
+Depends: adduser
+Recommends: systemd
+Section: admin
+Priority: optional
+Description: simplemonitor agent (host metrics and eBPF network flows)
+ Collects CPU, memory, disk and network metrics and, with eBPF, host-to-host
+ traffic volumes, and sends them to a simplemonitor server over gRPC.
+ Installed in /opt/simplemonitor/agent and run as a systemd service. Needs
+ Linux 5.8 or newer for the capabilities it uses (CAP_BPF, CAP_PERFMON).
