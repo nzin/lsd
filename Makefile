@@ -1,4 +1,4 @@
-.PHONY: proto generate web build test test-bpf docker up down deb deb-server deb-agent linux-binary clean
+.PHONY: proto generate web build test test-bpf test-metrics docs docs-docker docker up down deb deb-server deb-agent linux-binary clean
 
 proto:
 	protoc -I proto --go_out=. --go_opt=module=simplemonitor \
@@ -23,6 +23,33 @@ test:
 test-bpf:
 	docker run --rm --privileged -v $(CURDIR):/src -w /src golang:1.27-bookworm \
 	  go test -tags bpftest -v ./internal/agent/flows/...
+
+# docs/install.md -> docs/install.pdf (needs pandoc and pdflatex). The PDF is committed and embedded
+# into the program (see `simplemonitor get-documentation`), so re-run this after editing the markdown.
+#
+# Works with pandoc 3.1 (Ubuntu 24.04) up to 3.8 and newer: the syntax highlighting option was renamed in 3.8.
+# On Ubuntu: sudo apt install make pandoc texlive-latex-recommended texlive-latex-extra \
+#                 texlive-fonts-recommended lmodern
+DOCS_PDF ?= docs/install.pdf
+PANDOC_HIGHLIGHT := $(shell pandoc --help 2>/dev/null | grep -q -e '--syntax-highlighting' \
+                      && echo --syntax-highlighting=breezedark || echo --highlight-style=breezedark)
+PANDOC_PDF_FLAGS := --pdf-engine=pdflatex --template docs/templates/eisvogel.latex \
+                    --toc $(PANDOC_HIGHLIGHT) --number-sections
+docs:
+	@command -v pandoc >/dev/null || { echo "pandoc is required (see the package list above)"; exit 1; }
+	pandoc docs/install.md -o $(DOCS_PDF) $(PANDOC_PDF_FLAGS)
+	@echo "wrote $(DOCS_PDF)"
+
+# The same, inside an Ubuntu 24.04 container: the reference environment (see deploy/docs.Dockerfile).
+docs-docker:
+	docker build -q -t simplemonitor-docs -f deploy/docs.Dockerfile deploy
+	docker run --rm --user "$$(id -u):$$(id -g)" -e HOME=/tmp -v "$(CURDIR):/src" -w /src simplemonitor-docs make docs
+
+# Ground-truth checks of the CPU / memory numbers (known busy loops, known allocations, /proc cross-check),
+# inside a container with a 2-CPU and 2 GB limit.
+test-metrics:
+	docker run --rm --cpus=2 --memory=2g -v sm-gomod:/go/pkg/mod -v $(CURDIR):/src -w /src golang:1.27-bookworm \
+	  go test -tags containertest -v -count=1 -run 'Cgroup|HostMode' ./internal/agent/hostmetrics/
 
 docker:
 	docker compose -f deploy/docker-compose.yml build

@@ -47,6 +47,16 @@ func TestParseCgroup(t *testing.T) {
 	}
 }
 
+func TestWorkingSetExcludesInactiveCache(t *testing.T) {
+	if got := (cgroupSnapshot{memCurrent: 1000, memInactiveFile: 400}).workingSet(); got != 600 {
+		t.Fatalf("working set = %d, want 600", got)
+	}
+	// never underflows if the counters are read at slightly different moments
+	if got := (cgroupSnapshot{memCurrent: 100, memInactiveFile: 400}).workingSet(); got != 0 {
+		t.Fatalf("working set = %d, want 0", got)
+	}
+}
+
 func TestCgroupSnapshot(t *testing.T) {
 	dir := t.TempDir()
 	w := func(n, c string) { _ = os.WriteFile(filepath.Join(dir, n), []byte(c), 0o644) }
@@ -54,7 +64,7 @@ func TestCgroupSnapshot(t *testing.T) {
 	w("cpu.max", "50000 100000\n")
 	w("memory.current", "4096\n")
 	w("memory.max", "max\n")
-	w("memory.stat", "anon 1\nfile 2048\n")
+	w("memory.stat", "anon 1\nfile 2048\ninactive_file 1024\n")
 	w("io.stat", "8:0 rbytes=10 wbytes=20 rios=1 wios=2\n")
 	w("memory.swap.current", "777\n")
 	w("memory.swap.max", "max\n")
@@ -67,7 +77,7 @@ func TestCgroupSnapshot(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.cpuUsageUs != 500 || !near(s.cpuLimitCores, 0.5) || s.memCurrent != 4096 || s.memMax != 0 || s.memFile != 2048 || s.wbytes != 20 || s.swapCurrent != 777 || s.swapMax != 0 {
+	if s.cpuUsageUs != 500 || !near(s.cpuLimitCores, 0.5) || s.memCurrent != 4096 || s.memMax != 0 || s.memFile != 2048 || s.memInactiveFile != 1024 || s.wbytes != 20 || s.swapCurrent != 777 || s.swapMax != 0 {
 		t.Fatalf("%+v", s)
 	}
 }

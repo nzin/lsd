@@ -68,14 +68,20 @@ func newLogger(level string) *slog.Logger {
 
 func main() {
 	root := &cobra.Command{
-		Use:           "simplemonitor",
-		Short:         "Simple host and network monitor (agent + server)",
+		Use:   "simplemonitor",
+		Short: "Simple host and network monitor (agent + server)",
+		Long: `Simple host and network monitor: one binary, run as an agent on each machine or as the server.
+
+For the installation and configuration guide (PDF), the systemd units and the example
+configuration files, use the get-documentation command. For example:
+
+  simplemonitor get-documentation --directory ./sm-docs`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 	var logLevel string
 	root.PersistentFlags().StringVar(&logLevel, "log-level", env("LOG_LEVEL", "info"), "debug|info|warn|error [SM_LOG_LEVEL]")
-	root.AddCommand(agentCmd(&logLevel), serverCmd(&logLevel), loadgenCmd(&logLevel), healthcheckCmd(), &cobra.Command{
+	root.AddCommand(agentCmd(&logLevel), serverCmd(&logLevel), loadgenCmd(&logLevel), getDocumentationCmd(), healthcheckCmd(), &cobra.Command{
 		Use: "version", Run: func(*cobra.Command, []string) { fmt.Println(version) },
 	})
 	if err := root.Execute(); err != nil {

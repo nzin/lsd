@@ -95,6 +95,7 @@ type cgroupSnapshot struct {
 	cpuUsageUs, cpuUserUs, cpuSystemUs uint64
 	cpuLimitCores                      float64
 	memCurrent, memMax, memFile        uint64
+	memInactiveFile                    uint64 // reclaimable page cache
 	swapCurrent, swapMax               uint64
 	rbytes, wbytes, rios, wios         uint64
 }
@@ -123,10 +124,21 @@ func (c *cgroupReader) snapshot() (cgroupSnapshot, error) {
 		s.swapMax, _ = strconv.ParseUint(strings.TrimSpace(v), 10, 64) // "max" -> 0
 	}
 	if v, err := c.read("memory.stat"); err == nil {
-		s.memFile = parseKeyed(v)["file"]
+		st := parseKeyed(v)
+		s.memFile, s.memInactiveFile = st["file"], st["inactive_file"]
 	}
 	if v, err := c.read("io.stat"); err == nil {
 		s.rbytes, s.wbytes, s.rios, s.wios = parseIOStat(v)
 	}
 	return s, nil
+}
+
+// workingSet is the memory a container really holds: memory.current minus inactive page cache, which the
+// kernel drops under pressure. This is what `docker stats` and Kubernetes report; memory.current alone
+// would count every file the container ever read or wrote.
+func (s cgroupSnapshot) workingSet() uint64 {
+	if s.memInactiveFile >= s.memCurrent {
+		return 0
+	}
+	return s.memCurrent - s.memInactiveFile
 }

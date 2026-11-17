@@ -101,6 +101,32 @@ Both services are enabled and started on install. Every flag is a `SM_*` variabl
 
 Removing a package stops and disables its service; the env file survives until `--purge`. Stored metrics (`/var/lib/simplemonitor-server`), the node id and the `simplemonitor` user are kept even on purge: delete them by hand if you want them gone.
 
+## Documentation
+
+The installation and configuration guide is [docs/install.md](docs/install.md), also as a PDF ([docs/install.pdf](docs/install.pdf)). Both are built into the program, so a machine that only has the binary can get them:
+
+```bash
+simplemonitor get-documentation --directory ./sm-docs
+```
+
+This writes `install.pdf`, `install.md`, the systemd units (`systemd/`) and the example configuration files (`config/`), and refuses to overwrite existing files unless you add `--force`.
+
+After editing `docs/install.md`, regenerate the PDF (it uses the Eisvogel template in `docs/templates/`). The PDF is committed and embedded into the binary, and a test checks that every `SM_*` variable and flag the guide mentions exists in the code, and that every one the code has is documented.
+
+```bash
+make docs-docker     # in an Ubuntu 24.04 container (the reference environment, needs only Docker)
+make docs            # with the pandoc and LaTeX installed on this machine
+```
+
+`make docs` was tested with pandoc 3.1.3 on Ubuntu 24.04 (inside the container above) and with pandoc 3.8 on macOS; it picks the right syntax-highlighting option for the installed pandoc version. On a plain Ubuntu 24.04 machine:
+
+```bash
+sudo apt install make pandoc texlive-latex-recommended texlive-latex-extra \
+     texlive-fonts-recommended lmodern
+```
+
+The PDF is built with `pdflatex` and the standard Latin Modern fonts on purpose: no system fonts are involved, so the result does not depend on the machine, and the template's default font (Source Sans) would need `texlive-fonts-extra`, 1.7 GB installed on Ubuntu. The one constraint is that `docs/install.md` must stay plain ASCII (a test enforces it).
+
 ## How it works
 
 **Flows.** A TC classifier (ingress + egress, attached with TCX on Linux ≥ 6.6, else `clsact` + `cls_bpf`) counts bytes/packets per `(src, dst, protocol, direction)` in an LRU hash map. It only reads UAPI `__sk_buff` fields, so no BTF/CO-RE is needed and one little-endian object runs on amd64 and arm64. Ports are intentionally not part of the key: ephemeral ports would explode cardinality. Byte counts come from `skb->len`, so GSO/GRO super-packets make *packet* counts approximate.
@@ -124,10 +150,12 @@ Removing a package stops and disables its service; the env file survives until `
 ```bash
 make test        # Go unit tests (+ `cd web && npm test`)
 make deb         # .deb packages for the server and the agent (see above)
+make docs        # docs/install.md -> docs/install.pdf (pandoc + pdflatex; or make docs-docker)
+make test-metrics  # checks the CPU / memory numbers against known loads, in a container
 make test-bpf    # runs the real BPF program with BPF_PROG_TEST_RUN (privileged container)
 make generate    # recompile bpf/flows.bpf.c (clang in a container); outputs are committed
 make proto       # regenerate gRPC code (protoc + protoc-gen-go + protoc-gen-go-grpc)
 cd web && npm run dev   # Vite dev server, proxies /api to localhost:8080
 ```
 
-Layout: `cmd/simplemonitor` (CLI) · `internal/agent` (collection, eBPF, sender) · `internal/server` (ingest, store, topology, api) · `internal/loadgen` (demo traffic) · `bpf/` (C source) · `proto/` · `web/` (Vue app, embedded into the binary) · `deploy/` (Dockerfile, compose) · `packaging/` (systemd units, env files and maintainer scripts for the `.deb`s).
+Layout: `cmd/simplemonitor` (CLI) · `internal/agent` (collection, eBPF, sender) · `internal/server` (ingest, store, topology, api) · `internal/loadgen` (demo traffic) · `bpf/` (C source) · `proto/` · `web/` (Vue app, embedded into the binary) · `deploy/` (Dockerfile, compose) · `docs/` (installation guide, embedded) · `packaging/` (systemd units, env files and maintainer scripts for the `.deb`s).

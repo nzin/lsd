@@ -93,7 +93,7 @@ func (c *Collector) Collect(now time.Time) (*pb.HostSample, []*pb.DiskSample, []
 		}
 		c.lastCG = snap
 		// Memory: the container's usage against its limit (or host total).
-		host.MemUsed = snap.memCurrent
+		host.MemUsed = snap.workingSet() // not memory.current: that includes reclaimable page cache
 		host.MemCached = snap.memFile
 		if snap.memMax > 0 && (host.MemTotal == 0 || snap.memMax < host.MemTotal) {
 			host.MemTotal = snap.memMax
