@@ -63,7 +63,7 @@ func (s *Service) Push(stream grpc.ClientStreamingServer[pb.MetricsBatch, pb.Pus
 		if !nodeIDRe.MatchString(b.NodeId) {
 			return status.Error(codes.InvalidArgument, "invalid node_id")
 		}
-		if err := s.handle(stream.Context(), b); err != nil {
+		if err := s.Ingest(stream.Context(), b); err != nil {
 			s.Log.Error("store batch", "node", b.NodeId, "err", err)
 			return status.Error(codes.Internal, "storage error")
 		}
@@ -71,7 +71,8 @@ func (s *Service) Push(stream grpc.ClientStreamingServer[pb.MetricsBatch, pb.Pus
 	}
 }
 
-func (s *Service) handle(ctx context.Context, b *pb.MetricsBatch) error {
+// Ingest stores one batch (from an agent's stream, or from the server's own monitoring) and feeds the live topology.
+func (s *Service) Ingest(ctx context.Context, b *pb.MetricsBatch) error {
 	if len(b.Disks) > maxDisks {
 		b.Disks = b.Disks[:maxDisks]
 	}

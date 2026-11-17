@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import MetricChart from '../components/MetricChart.vue'
 import NodesHeader from '../components/NodesHeader.vue'
-import { nodeName, nodeSlot, nodes } from '../store'
+import { agentNodes, nodeName, nodeSlot } from '../store'
 
 const mountNamer = (l: Record<string, string>) => ({
   key: `${l.node}|${l.mount}`, name: `${nodeName(l.node)} ${l.mount}`, slot: nodeSlot(l.node),
@@ -12,7 +12,7 @@ const mountNamer = (l: Record<string, string>) => ({
   <div class="overview">
     <NodesHeader />
 
-    <div v-if="!nodes.length" class="card muted empty">
+    <div v-if="!agentNodes.length" class="card muted empty">
       No agents have reported yet. Start one with
       <code>lsd agent --server &lt;server&gt;:7070</code>.
     </div>

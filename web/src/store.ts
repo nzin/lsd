@@ -30,6 +30,8 @@ export function setAutoRefresh(v: boolean) { autoRefresh.value = v; save('lsd.au
 export const refreshTick = ref(0)
 
 export const nodes = ref<NodeView[]>([])
+/** The agents only: the server's own node (role 'server') is a node, but not a connected agent. */
+export const agentNodes = computed(() => nodes.value.filter(n => n.role !== 'server'))
 export const nodesError = ref<string | null>(null)
 
 export async function refreshNodes() {

@@ -17,8 +17,6 @@ import (
 	"google.golang.org/grpc/metadata"
 
 	pb "lsd/gen/lsd/v1"
-	"lsd/internal/agent/flows"
-	"lsd/internal/agent/hostmetrics"
 )
 
 type Config struct {
@@ -38,13 +36,11 @@ type Config struct {
 }
 
 type Agent struct {
-	cfg   Config
-	log   *slog.Logger
-	id    string
-	hm    *hostmetrics.Collector
-	fl    *flows.Collector
-	buf   *ring
-	flows bool
+	cfg Config
+	log *slog.Logger
+	id  string
+	s   *Sampler
+	buf *ring
 }
 
 func New(cfg Config, log *slog.Logger) *Agent {
@@ -59,18 +55,12 @@ func New(cfg Config, log *slog.Logger) *Agent {
 
 func (a *Agent) Run(ctx context.Context) error {
 	a.id = nodeID(a.cfg.NodeID, a.cfg.StateDir)
-	a.hm = hostmetrics.New(a.cfg.MetricsScope)
-	a.log.Info("agent starting", "node_id", a.id, "server", a.cfg.Server, "interval", a.cfg.Interval, "metrics", a.hm.Describe())
+	a.s = NewSampler(a.id, a.cfg.Interval, a.cfg.MetricsScope, a.log)
+	defer a.s.Close()
+	a.log.Info("agent starting", "node_id", a.id, "server", a.cfg.Server, "interval", a.cfg.Interval, "metrics", a.s.Describe())
 
 	if !a.cfg.DisableFlows {
-		fl, err := flows.New(a.cfg.FlowIfaces, a.log)
-		if err != nil {
-			a.log.Warn("flow capture disabled (host metrics keep working)", "err", err)
-		} else {
-			a.fl, a.flows = fl, true
-			defer fl.Close()
-			a.log.Info("flow capture enabled", "ifaces", fl.Interfaces())
-		}
+		a.s.StartFlows(a.cfg.FlowIfaces)
 	}
 
 	go a.sendLoop(ctx)
@@ -81,40 +71,17 @@ func (a *Agent) Run(ctx context.Context) error {
 func (a *Agent) collectLoop(ctx context.Context) {
 	t := time.NewTicker(a.cfg.Interval)
 	defer t.Stop()
-	a.sample(time.Now()) // prime counters; yields zero rates, not sent
-	if a.fl != nil {
-		_, _ = a.fl.Collect()
-	}
+	a.s.Prime(time.Now()) // initialise the counters; the zero rates of this first sample are not sent
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case now := <-t.C:
-			if b := a.sample(now); b != nil {
+			if b := a.s.Sample(now); b != nil {
 				a.buf.push(b)
 			}
 		}
 	}
-}
-
-func (a *Agent) sample(now time.Time) *pb.MetricsBatch {
-	host, disks, netifs, err := a.hm.Collect(now)
-	if err != nil {
-		a.log.Warn("collect host metrics", "err", err)
-		return nil
-	}
-	b := &pb.MetricsBatch{
-		NodeId: a.id, TsUnixMs: now.UnixMilli(), IntervalMs: uint32(a.cfg.Interval / time.Millisecond),
-		Host: host, Disks: disks, Netifs: netifs,
-	}
-	if a.fl != nil {
-		if fs, err := a.fl.Collect(); err != nil {
-			a.log.Warn("collect flows", "err", err)
-		} else {
-			b.Flows = fs
-		}
-	}
-	return b
 }
 
 func (a *Agent) dial() (*grpc.ClientConn, error) {
@@ -167,7 +134,7 @@ func (a *Agent) session(ctx context.Context) (connected bool, err error) {
 	}
 
 	rctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	_, err = client.Register(rctx, registerRequest(a.id, a.cfg.Hostname, a.cfg.Version, a.flows), grpc.WaitForReady(true))
+	_, err = client.Register(rctx, RegisterRequest(a.id, a.cfg.Hostname, a.cfg.Version, a.s.FlowsEnabled()), grpc.WaitForReady(true))
 	cancel()
 	if err != nil {
 		return false, fmt.Errorf("register: %w", err)

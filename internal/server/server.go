@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"os"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -19,6 +21,7 @@ import (
 	"lsd/internal/netutil"
 	"lsd/internal/server/api"
 	"lsd/internal/server/ingest"
+	"lsd/internal/server/selfmon"
 	"lsd/internal/server/store"
 	"lsd/internal/server/topology"
 	"lsd/web"
@@ -33,6 +36,9 @@ type Config struct {
 	TopN      int
 	TLSCert   string
 	TLSKey    string
+
+	SelfMonitor bool   // also monitor the machine the server runs on, and show it as a node
+	Version     string // reported for the server's own node
 }
 
 func Run(ctx context.Context, cfg Config, log *slog.Logger) error {
@@ -69,7 +75,8 @@ func Run(ctx context.Context, cfg Config, log *slog.Logger) error {
 		opts = append(opts, grpc.Creds(credentials.NewTLS(&tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: tls.VersionTLS12})))
 	}
 	gs := grpc.NewServer(opts...)
-	pb.RegisterIngestServer(gs, &ingest.Service{Store: st, Res: res, Live: live, TopN: cfg.TopN, Log: log})
+	svc := &ingest.Service{Store: st, Res: res, Live: live, TopN: cfg.TopN, Log: log}
+	pb.RegisterIngestServer(gs, svc)
 	glis, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		return fmt.Errorf("listen grpc: %w", err)
@@ -85,10 +92,26 @@ func Run(ctx context.Context, cfg Config, log *slog.Logger) error {
 		return fmt.Errorf("listen http: %w", err)
 	}
 
+	// The server's own machine, as a node (in-process: no gRPC, so a token or TLS is not involved). It must stop before
+	// the store is closed (deferred calls run last-in first, and this one is registered after st.Close()).
+	if cfg.SelfMonitor {
+		exists := func(p string) bool { _, err := os.Stat(p); return err == nil }
+		selfCtx, stopSelf := context.WithCancel(ctx)
+		var selfDone sync.WaitGroup
+		selfDone.Add(1)
+		go func() {
+			defer selfDone.Done()
+			selfmon.Run(selfCtx, svc, selfmon.Options{
+				NodeID: api.ServerNodeID, Version: cfg.Version, Scope: selfmon.ScopeFor(exists, os.Getenv), Flows: true,
+			}, log)
+		}()
+		defer func() { stopSelf(); selfDone.Wait() }()
+	}
+
 	errc := make(chan error, 2)
 	go func() { errc <- fmt.Errorf("grpc: %w", gs.Serve(glis)) }()
 	go func() { errc <- fmt.Errorf("http: %w", hs.Serve(hlis)) }()
-	log.Info("server started", "grpc", cfg.GRPCAddr, "http", cfg.HTTPAddr, "data", cfg.DataDir, "retention", cfg.Retention, "auth", cfg.Token != "")
+	log.Info("server started", "grpc", cfg.GRPCAddr, "http", cfg.HTTPAddr, "data", cfg.DataDir, "retention", cfg.Retention, "auth", cfg.Token != "", "self_monitor", cfg.SelfMonitor)
 
 	select {
 	case <-ctx.Done():

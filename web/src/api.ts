@@ -6,6 +6,7 @@ export interface NodeView {
   id: string; hostname: string; ips: string[]; os: string; kernel: string; version: string
   flowsEnabled: boolean; firstSeen: number; lastSeen: number; intervalMs: number
   online: boolean; latest?: Latest
+  role?: 'agent' | 'server' // 'server' = the machine the server itself runs on; absent = agent
 }
 export interface Series { labels: Record<string, string>; points: [number, number][] }
 export interface MetricsResponse { metric: string; node: string; from: number; to: number; stepSeconds: number; series: Series[] }

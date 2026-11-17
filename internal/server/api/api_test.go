@@ -203,3 +203,38 @@ func TestNodesPromAndStatic(t *testing.T) {
 		t.Fatalf("healthz: %d", code)
 	}
 }
+
+func TestServerNodeIsMarkedAsServer(t *testing.T) {
+	a, st := newAPI(t)
+	st.Nodes.Upsert(&pb.RegisterRequest{NodeId: "server", Hostname: "box"}, time.Now())
+	st.Nodes.SetRole("server", store.RoleServer)
+
+	code, body := get(t, a, "/api/nodes")
+	var nodes []struct {
+		ID   string `json:"id"`
+		Role string `json:"role"`
+	}
+	if code != 200 || json.Unmarshal(body, &nodes) != nil {
+		t.Fatalf("nodes: %d %s", code, body)
+	}
+	roles := map[string]string{}
+	for _, n := range nodes {
+		roles[n.ID] = n.Role
+	}
+	if roles["server"] != "server" || roles["a"] != "" {
+		t.Fatalf("roles: %v (the server node says server, an agent has none)", roles)
+	}
+
+	code, body = get(t, a, "/api/topology?window=30s")
+	var tv topoView
+	if code != 200 || json.Unmarshal(body, &tv) != nil {
+		t.Fatalf("topology: %d %s", code, body)
+	}
+	kinds, labels := map[string]string{}, map[string]string{}
+	for _, n := range tv.Nodes {
+		kinds[n.ID], labels[n.ID] = n.Kind, n.Label
+	}
+	if kinds["server"] != "server" || labels["server"] != "box" || kinds["a"] != "agent" {
+		t.Fatalf("topology kinds: %v labels: %v", kinds, labels)
+	}
+}

@@ -109,7 +109,7 @@ func TestInstallGuideMatchesTheCode(t *testing.T) {
 	if len(envs) < 15 {
 		t.Fatalf("only found %d env vars in main.go, the pattern is probably stale", len(envs))
 	}
-	for _, v := range regexp.MustCompile(`\bSM_[A-Z_]+\b`).FindAllString(guide, -1) {
+	for _, v := range regexp.MustCompile(`\bLSD_[A-Z_]+\b`).FindAllString(guide, -1) {
 		if !envs[v] {
 			t.Errorf("install.md mentions %s, which the program does not read", v)
 		}

@@ -19,7 +19,7 @@ It is deliberately small: one program, `lsd`, that you run as a light **agent** 
 ## The pieces
 
 * **Agents** collect CPU / memory / disk / network metrics and, with **eBPF**, host-to-host traffic volume. They push everything to the server over **gRPC**.
-* The **server** stores metrics in an embedded **Prometheus TSDB** (pure Go, queryable with PromQL) and serves a **Vue 3** web UI: per-node and all-node charts for any period, and a **live topology** where edge direction is an arrow and edge width follows traffic volume.
+* The **server** stores metrics in an embedded **Prometheus TSDB** (pure Go, queryable with PromQL) and serves a **Vue 3** web UI: per-node and all-node charts for any period, and a **live topology** where edge direction is an arrow and edge width follows traffic volume. The server also monitors its own machine and shows it as a node (`--self-monitor`, on by default).
 
 ```
 agent (each Linux host)                        server
@@ -38,7 +38,7 @@ open http://localhost:8080
 ```
 
 Two small traffic generators run inside the agents' network namespaces so the topology has something to show:
-**agent-1 → agent-2** carries ~4 MB/s on a slow sine wave (thick edge), **agent-2 → agent-1** ~400 KB/s steady (thin edge), plus thin edges to/from the server.
+**agent-1 → agent-2** carries ~4 MB/s on a slow sine wave (thick edge), **agent-2 → agent-1** ~400 KB/s steady (thin edge), plus thin edges to/from the server. The server monitors itself too, so the UI shows three nodes: the two agents and the server.
 
 Pages: **Metrics** (a *Nodes* dropdown switches between all nodes and a single node's detail), **Topology** (Live with a 10 s – 5 min window, or History over the selected range), **In loop** (a wall-display mode that rotates through connected agents, CPU, memory, disk usage, disk IOPS, swap, load average and the live topology, 5 seconds each; ← / → to switch, space to pause). Every chart has a *Table* view; the topology has a *Connections* table.
 
@@ -103,7 +103,7 @@ It works from macOS too (the binary is static; if `dpkg-deb` isn't installed it 
 | systemd unit | `lsd-server.service` | `lsd-agent.service` |
 | Config (env file) | `/etc/lsd/server.env` | `/etc/lsd/agent.env` |
 | State | `/var/lib/lsd-server` (metrics) | `/var/lib/lsd-agent` (node id) |
-| Runs as | `lsd` user, no capabilities | `lsd` user + `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` |
+| Runs as | `lsd` user + `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` (to capture its own traffic) | `lsd` user + the same capabilities |
 
 ```bash
 sudo apt install ./lsd-server_0.1.0_amd64.deb          # UI on http://<host>:8080, gRPC on :7070
@@ -113,7 +113,7 @@ sudo systemctl restart lsd-agent
 journalctl -u lsd-agent -f
 ```
 
-Both services are enabled and started on install. Every flag is a `LSD_*` variable in the env files (commented examples are included); edit and `systemctl restart`. The two packages use separate directories, so they can be installed on the same machine. The agent unit relies on `CAP_BPF`, so it needs Linux 5.8+ (tested on a 7.0 kernel only); on older kernels you'd have to adjust the capabilities with `systemctl edit lsd-agent`.
+Both services are enabled and started on install. Every flag is a `LSD_*` variable in the env files (commented examples are included); edit and `systemctl restart`. The two packages use separate directories, so they can be installed on the same machine, but the server already monitors its own machine (set `LSD_SELF_MONITOR=false` on the server if you also run an agent there). The units rely on `CAP_BPF`, so it needs Linux 5.8+ (tested on a 7.0 kernel only); on older kernels you'd have to adjust the capabilities with `systemctl edit lsd-agent`.
 
 Removing a package stops and disables its service; the env file survives until `--purge`. Stored metrics (`/var/lib/lsd-server`), the node id and the `lsd` user are kept even on purge: delete them by hand if you want them gone.
 

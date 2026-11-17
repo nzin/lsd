@@ -31,7 +31,8 @@ func nodeID(explicit, stateDir string) string {
 	return id
 }
 
-func registerRequest(id, hostname, version string, flows bool) *pb.RegisterRequest {
+// RegisterRequest describes this machine to the server (identity, addresses, OS), for Register.
+func RegisterRequest(id, hostname, version string, flows bool) *pb.RegisterRequest {
 	if hostname == "" {
 		hostname, _ = os.Hostname()
 	}

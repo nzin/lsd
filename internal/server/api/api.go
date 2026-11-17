@@ -379,7 +379,11 @@ func (a *API) buildTopology(mode string, window time.Duration, edges []topoEdge)
 	now := time.Now()
 	nodes := map[string]topoNode{}
 	for _, n := range a.Store.Nodes.List() {
-		nodes[n.ID] = topoNode{ID: n.ID, Label: n.Hostname, Kind: "agent", Online: n.Online(now)}
+		kind := "agent"
+		if n.Role == store.RoleServer { // the server's own node (--self-monitor): drawn as the server box
+			kind = "server"
+		}
+		nodes[n.ID] = topoNode{ID: n.ID, Label: n.Hostname, Kind: kind, Online: n.Online(now)}
 	}
 	ensure := func(id string) {
 		if _, ok := nodes[id]; ok {

@@ -14,6 +14,7 @@ ExecStart=/opt/lsd/server/lsd server
 Restart=on-failure
 RestartSec=5
 LimitNOFILE=65536
+LimitMEMLOCK=infinity # eBPF maps (older kernels count them against this limit)
 # /var/lib/lsd-server, owned by the service user
 StateDirectory=lsd-server
 StateDirectoryMode=0750
@@ -30,7 +31,13 @@ ProtectControlGroups=true
 RestrictSUIDSGID=true
 RestrictRealtime=true
 LockPersonality=true
-CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+
+# The server monitors its own machine too (LSD_SELF_MONITOR, on by default), including its eBPF traffic capture, like an
+# agent does. Not root: only the capabilities needed to load and attach the eBPF program. Without them the server logs
+# "flow capture disabled" and still reports its host metrics.
+AmbientCapabilities=CAP_BPF CAP_NET_ADMIN CAP_PERFMON CAP_SYS_RESOURCE
+CapabilityBoundingSet=CAP_BPF CAP_NET_ADMIN CAP_PERFMON CAP_SYS_RESOURCE
 
 [Install]
 WantedBy=multi-user.target

@@ -35,7 +35,7 @@ const ifaceNamer = (l: Record<string, string>) => ({
         <div><dt>Addresses</dt><dd>{{ node.ips.join(', ') || '–' }}</dd></div>
         <div><dt>OS</dt><dd>{{ node.os || '–' }}</dd></div>
         <div><dt>Kernel</dt><dd>{{ node.kernel || '–' }}</dd></div>
-        <div><dt>Agent</dt><dd>{{ node.version || '–' }}</dd></div>
+        <div><dt>Version</dt><dd>{{ node.version || '–' }}</dd></div>
         <div><dt>eBPF flows</dt><dd>{{ node.flowsEnabled ? 'enabled' : 'disabled' }}</dd></div>
         <div><dt>Last seen</dt><dd>{{ formatTime(node.lastSeen, true) }}</dd></div>
       </dl>

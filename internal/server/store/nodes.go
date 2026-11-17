@@ -15,6 +15,12 @@ import (
 
 var nodesBucket = []byte("nodes")
 
+// Node roles. An empty role means an agent (what nodes had before roles existed).
+const (
+	RoleAgent  = "agent"
+	RoleServer = "server" // the server's own machine, monitored in-process
+)
+
 type Node struct {
 	ID           string   `json:"id"`
 	Hostname     string   `json:"hostname"`
@@ -26,6 +32,7 @@ type Node struct {
 	FirstSeen    int64    `json:"firstSeen"` // unix ms
 	LastSeen     int64    `json:"lastSeen"`  // unix ms
 	IntervalMs   uint32   `json:"intervalMs"`
+	Role         string   `json:"role,omitempty"` // RoleServer for the server itself, empty for agents
 }
 
 // Online reports whether the node pushed within ~3 intervals.
@@ -111,6 +118,21 @@ func (r *Registry) Upsert(req *pb.RegisterRequest, now time.Time) Node {
 	r.mu.Unlock()
 	_ = r.persist(cp)
 	return cp
+}
+
+// SetRole sets the role of a registered node and persists it. It reports whether the node exists.
+func (r *Registry) SetRole(id, role string) bool {
+	r.mu.Lock()
+	n := r.nodes[id]
+	if n == nil {
+		r.mu.Unlock()
+		return false
+	}
+	n.Role = role
+	cp := *n
+	r.mu.Unlock()
+	_ = r.persist(cp)
+	return true
 }
 
 // Touch marks a node as seen (in memory only). Unknown nodes get a placeholder.

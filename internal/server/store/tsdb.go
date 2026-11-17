@@ -155,7 +155,10 @@ func (s *Store) AppendBatch(ctx context.Context, b *pb.MetricsBatch, edges []top
 		lat.RxBps += n.RxBps
 		lat.TxBps += n.TxBps
 	}
-	add("lsd_node_up", 1)
+	// lsd_node_up counts the agents that are connected (the "agents" metric); the server's own node is not one.
+	if n, ok := s.Nodes.Get(b.NodeId); !ok || n.Role != RoleServer {
+		add("lsd_node_up", 1)
+	}
 
 	// Flow counters: the agent sends deltas, series are monotonic totals.
 	// "node" on these series is the reporter; src/dst are resolved node ids.

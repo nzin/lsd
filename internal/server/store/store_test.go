@@ -128,3 +128,49 @@ func TestRegistryPersistsAndOnline(t *testing.T) {
 		t.Fatalf("not persisted: %+v %v", n, ok)
 	}
 }
+
+func TestServerRoleIsPersistedAndWritesNoNodeUp(t *testing.T) {
+	dir := t.TempDir()
+	s := open(t, dir)
+	ctx := context.Background()
+	now := time.Now().Truncate(time.Second)
+
+	s.Nodes.Upsert(&pb.RegisterRequest{NodeId: "srv", Hostname: "box"}, now)
+	s.Nodes.Upsert(&pb.RegisterRequest{NodeId: "ag", Hostname: "a"}, now)
+	if s.Nodes.SetRole("ghost", RoleServer) {
+		t.Fatal("SetRole on an unknown node must report false")
+	}
+	if !s.Nodes.SetRole("srv", RoleServer) {
+		t.Fatal("SetRole on a known node must report true")
+	}
+	for _, id := range []string{"srv", "ag"} {
+		if err := s.AppendBatch(ctx, batch(id, now, 1), nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	count := func(q string) int {
+		v, err := s.Query(ctx, q, now)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return len(v)
+	}
+	if count(`lsd_node_up{node="ag"}`) != 1 || count(`lsd_node_up{node="srv"}`) != 0 {
+		t.Fatal("lsd_node_up must exist for the agent and not for the server node")
+	}
+	if count(`lsd_cpu_percent{node="srv",mode="total"}`) != 1 {
+		t.Fatal("the server node still stores its metrics")
+	}
+	if err := s.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	s2 := open(t, dir)
+	defer s2.Close()
+	if n, _ := s2.Nodes.Get("srv"); n.Role != RoleServer {
+		t.Fatalf("role not persisted: %+v", n)
+	}
+	if n, _ := s2.Nodes.Get("ag"); n.Role != "" {
+		t.Fatalf("an agent has no role: %+v", n)
+	}
+}

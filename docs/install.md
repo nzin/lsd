@@ -70,6 +70,9 @@ what the numbers mean, and troubleshooting.
 - Any Linux distribution (the program is a single static binary).
 - Disk space for the metrics, in `--data-dir`. The amount depends on the number
   of nodes and on the retention (30 days by default).
+- To capture its own eBPF traffic (it monitors itself, see `LSD_SELF_MONITOR`), the
+  server needs the same capabilities as an agent. The Debian package grants them.
+  Without them the server still reports its own host metrics.
 
 **To build from source** (the Debian packages and the manual install)
 
@@ -105,10 +108,11 @@ container.
 | systemd service | `lsd-server` | `lsd-agent` |
 | Configuration | `/etc/lsd/server.env` | `/etc/lsd/agent.env` |
 | Data | `/var/lib/lsd-server` | `/var/lib/lsd-agent` |
-| Runs as | user `lsd`, no capabilities | user `lsd` with `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` |
+| Runs as | user `lsd` with `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` | the same |
 
-The two packages use separate directories, so they can be installed on the same
-machine. Both services are enabled and started when the package is installed.
+The two packages use separate directories, so both can be installed on the same
+machine, but there is no need to: the server already monitors its own machine (see
+below). Both services are enabled and started when the package is installed.
 
 ### Install the server
 
@@ -127,6 +131,15 @@ To change a setting, edit `/etc/lsd/server.env` (see
 sudoedit /etc/lsd/server.env
 sudo systemctl restart lsd-server
 ```
+
+The server also monitors the machine it runs on: that machine appears in the UI as a
+node named after its host name, with the same charts as the agents and, when allowed
+(the packaged service has the capabilities), its eBPF traffic in the topology. In a
+container it reports the container's own CPU and memory. It counts in `N/N nodes online`
+but not as a connected agent. There is no need for an agent on that machine; if you
+install one anyway, set `LSD_SELF_MONITOR=false` on the server, or the machine shows
+up twice and its traffic is counted twice. Turning the option off later leaves the old
+`server` node listed as offline.
 
 ### Install an agent
 
@@ -264,6 +277,7 @@ With systemd, put the environment variables in `/etc/lsd/server.env` or
 | `--token` | `LSD_TOKEN` | require this secret from agents (none) |
 | `--tls-cert` | `LSD_TLS_CERT` | certificate for the gRPC port (none) |
 | `--tls-key` | `LSD_TLS_KEY` | private key for the gRPC port (none) |
+| `--self-monitor` | `LSD_SELF_MONITOR` | also monitor this machine, shown as a node (`true`; `--self-monitor=false` turns it off) |
 | `--external-top-n` | | external IPs kept per batch, the rest is grouped (`50`) |
 | `--log-level` | `LSD_LOG_LEVEL` | `debug`, `info`, `warn` or `error` (`info`) |
 
@@ -334,7 +348,7 @@ curl http://localhost:8080/api/nodes        # one entry per agent
 ```
 
 In the browser, open `http://<server>:8080`. The top right corner shows how many
-nodes are online, for example `2/2 nodes online`.
+nodes are online, for example `3/3 nodes online` with two agents (the server counts as a node).
 
 On an agent machine, the log (`journalctl -u lsd-agent`) shows, in this
 order:
@@ -376,7 +390,7 @@ A node is shown as offline when it has not reported for three intervals (at leas
 
 ## Troubleshooting
 
-**The agent says "flow capture disabled".** It could not load or attach the eBPF
+**The agent (or the server) says "flow capture disabled".** It could not load or attach the eBPF
 program. Look at the reason in the log. Usually the service lacks `CAP_BPF`,
 `CAP_NET_ADMIN` or `CAP_PERFMON` (a hand-made service, or a container started
 without them), or the kernel is older than 5.8. The host metrics keep working.

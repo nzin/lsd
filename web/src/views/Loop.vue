@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import MetricChart from '../components/MetricChart.vue'
-import { nodeName, nodeSlot, nodes } from '../store'
+import { agentNodes, nodeName, nodeSlot } from '../store'
 import Topology from './Topology.vue'
 
 // Auto-rotating dashboards (for a wall display): one slide every SECONDS seconds.
@@ -47,7 +47,7 @@ const fit = () => { chartH.value = Math.max(300, window.innerHeight - 330) }
 onMounted(() => { fit(); window.addEventListener('resize', fit); window.addEventListener('keydown', onKey); schedule() })
 onBeforeUnmount(() => { window.clearTimeout(timer); window.removeEventListener('resize', fit); window.removeEventListener('keydown', onKey) })
 
-const online = computed(() => nodes.value.filter(n => n.online))
+const online = computed(() => agentNodes.value.filter(n => n.online))
 const mountNamer = (l: Record<string, string>) => ({
   key: `${l.node}|${l.mount}`, name: `${nodeName(l.node)} ${l.mount}`, slot: nodeSlot(l.node),
 })
@@ -77,12 +77,12 @@ const current = computed(() => slides[index.value])
   <section v-show="current.key === 'agents'" class="agents">
     <div class="card hero" role="status">
       <div class="big num">{{ online.length }}</div>
-      <div class="of">of {{ nodes.length }} agent{{ nodes.length === 1 ? '' : 's' }} connected</div>
+      <div class="of">of {{ agentNodes.length }} agent{{ agentNodes.length === 1 ? '' : 's' }} connected</div>
       <ul class="names">
-        <li v-for="n in nodes.slice(0, 12)" :key="n.id">
+        <li v-for="n in agentNodes.slice(0, 12)" :key="n.id">
           <span :class="n.online ? 'on' : 'off'">{{ n.online ? '●' : '○' }}</span> {{ n.hostname }}<span v-if="!n.online" class="muted"> (offline)</span>
         </li>
-        <li v-if="nodes.length > 12" class="muted">+ {{ nodes.length - 12 }} more</li>
+        <li v-if="agentNodes.length > 12" class="muted">+ {{ agentNodes.length - 12 }} more</li>
       </ul>
     </div>
     <MetricChart bare title="Connected agents" metric="agents" node="all" unit="number" integer area :height="chartH"

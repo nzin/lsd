@@ -146,6 +146,8 @@ func serverCmd(logLevel *string) *cobra.Command {
 	f.IntVar(&cfg.TopN, "external-top-n", 50, "max distinct external endpoints per batch; the rest are grouped")
 	f.StringVar(&cfg.TLSCert, "tls-cert", env("TLS_CERT", ""), "gRPC TLS certificate [LSD_TLS_CERT]")
 	f.StringVar(&cfg.TLSKey, "tls-key", env("TLS_KEY", ""), "gRPC TLS key [LSD_TLS_KEY]")
+	f.BoolVar(&cfg.SelfMonitor, "self-monitor", envBool("SELF_MONITOR", true), "also monitor the machine the server runs on and show it as a node (--self-monitor=false to turn off) [LSD_SELF_MONITOR]")
+	cfg.Version = version
 	return c
 }
 
