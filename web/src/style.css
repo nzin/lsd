@@ -58,6 +58,22 @@ button, select { font: inherit; color: inherit; }
 
 .page { max-width: 1280px; margin: 0 auto; padding: 0 16px 48px; }
 .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 16px; }
+
+/* Big screens (a 4K display at 100-200% scaling is 1920-3840 CSS px wide): lift the width cap, and show the
+   8 charts of the Nodes page as 4 columns x 2 rows that fill exactly the rest of the window, so the whole page is
+   visible without scrolling. The plots take the height the legends leave (they shrink when many nodes make a legend
+   wrap), down to a minimum, below which the page scrolls instead. 216px = everything above the grid (168px: header,
+   filters, title row) plus the page's 48px bottom padding. */
+@media (min-width: 1800px) {
+  .page { max-width: 3200px; }
+  .overview .grid-2 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    height: max(calc(100vh - 216px), 560px);
+  }
+  .overview .chart { display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+  .overview .chart .plot { flex: 1 1 0; min-height: 120px; }
+}
 .card {
   background: var(--surface-1); border: 1px solid var(--border); border-radius: 12px;
   padding: 16px; box-shadow: var(--shadow);
