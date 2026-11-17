@@ -1,0 +1,143 @@
+package api
+
+import (
+	"encoding/json"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"testing/fstest"
+	"time"
+
+	pb "simplemonitor/gen/simplemonitor/v1"
+	"simplemonitor/internal/server/store"
+	"simplemonitor/internal/server/topology"
+)
+
+func newAPI(t *testing.T) (*API, *store.Store) {
+	t.Helper()
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	st, err := store.Open(store.Options{Dir: t.TempDir()}, log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { st.Close() })
+	now := time.Now()
+	st.Nodes.Upsert(&pb.RegisterRequest{NodeId: "a", Hostname: "host-a", Ips: []string{"10.0.0.1"}, FlowsEnabled: true}, now)
+	st.Nodes.Touch("a", 5000, now)
+	for i := 12; i >= 0; i-- {
+		ts := now.Add(-time.Duration(i) * 5 * time.Second)
+		err := st.AppendBatch(t.Context(), &pb.MetricsBatch{
+			NodeId: "a", TsUnixMs: ts.UnixMilli(), IntervalMs: 5000,
+			Host:   &pb.HostSample{CpuTotalPct: 42, MemTotal: 1000, MemUsed: 500},
+			Netifs: []*pb.NetIfSample{{Iface: "eth0", RxBps: 100, TxBps: 200}},
+		}, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	live := topology.NewLive(time.Minute)
+	live.Add(now, []topology.Edge{{Src: "a", Dst: "8.8.8.8", Proto: "tcp", Bytes: 3000, Packets: 30}})
+	static := fstest.MapFS{"index.html": {Data: []byte("<html>spa</html>")}, "assets/app.js": {Data: []byte("x")}}
+	return &API{Store: st, Live: live, Static: static, Log: log}, st
+}
+
+func get(t *testing.T, a *API, url string) (int, []byte) {
+	t.Helper()
+	rec := httptest.NewRecorder()
+	a.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, url, nil))
+	return rec.Code, rec.Body.Bytes()
+}
+
+func TestMetricsEndpoint(t *testing.T) {
+	a, _ := newAPI(t)
+	code, body := get(t, a, "/api/metrics?metric=cpu&node=a&range=5m")
+	if code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	var r struct {
+		Series []struct {
+			Labels map[string]string
+			Points [][2]float64
+		}
+	}
+	if err := json.Unmarshal(body, &r); err != nil || len(r.Series) != 1 || len(r.Series[0].Points) == 0 {
+		t.Fatalf("bad response: %v %s", err, body)
+	}
+	if r.Series[0].Labels["node"] != "a" || r.Series[0].Points[0][1] != 42 {
+		t.Fatalf("unexpected series: %+v", r.Series[0])
+	}
+	if _, ok := r.Series[0].Labels["__name__"]; ok {
+		t.Fatal("__name__ should be stripped")
+	}
+	// all-nodes + derived metric (vector matching)
+	code, body = get(t, a, "/api/metrics?metric=mem_pct&node=all&range=5m")
+	if code != 200 || !json.Valid(body) {
+		t.Fatalf("mem_pct: %d %s", code, body)
+	}
+}
+
+func TestMetricsInputValidation(t *testing.T) {
+	a, _ := newAPI(t)
+	for name, url := range map[string]string{
+		"unknown metric":   "/api/metrics?metric=nope",
+		"promql injection": `/api/metrics?metric=cpu&node=a"}%20or%20vector(1)%20%7Bx="`,
+		"bad range":        "/api/metrics?metric=cpu&range=banana",
+		"inverted range":   "/api/metrics?metric=cpu&from=2000000000&to=1000000000",
+		"huge range":       "/api/metrics?metric=cpu&range=900d",
+	} {
+		if code, body := get(t, a, url); code != 400 {
+			t.Errorf("%s: want 400, got %d (%s)", name, code, body)
+		}
+	}
+}
+
+func TestTopologyEndpoints(t *testing.T) {
+	a, _ := newAPI(t)
+	code, body := get(t, a, "/api/topology?window=30s")
+	if code != 200 {
+		t.Fatalf("%d %s", code, body)
+	}
+	var tv topoView
+	if err := json.Unmarshal(body, &tv); err != nil {
+		t.Fatal(err)
+	}
+	if tv.Mode != "live" || len(tv.Edges) != 1 || tv.Edges[0].Bps != 100 { // 3000 B / 30 s
+		t.Fatalf("live topology: %+v", tv)
+	}
+	kinds := map[string]string{}
+	for _, n := range tv.Nodes {
+		kinds[n.ID] = n.Kind
+	}
+	if kinds["a"] != "agent" || kinds["8.8.8.8"] != "external" {
+		t.Fatalf("node kinds: %v", kinds)
+	}
+	if code, body = get(t, a, "/api/topology?range=1h"); code != 200 {
+		t.Fatalf("history: %d %s", code, body)
+	}
+}
+
+func TestNodesPromAndStatic(t *testing.T) {
+	a, _ := newAPI(t)
+	code, body := get(t, a, "/api/nodes")
+	var nodes []nodeView
+	if code != 200 || json.Unmarshal(body, &nodes) != nil || len(nodes) != 1 || !nodes[0].Online || nodes[0].Latest == nil {
+		t.Fatalf("nodes: %d %s", code, body)
+	}
+	if code, body = get(t, a, "/api/v1/query?query=sm_node_up"); code != 200 {
+		t.Fatalf("instant query: %d %s", code, body)
+	}
+	if code, _ = get(t, a, "/api/v1/query?query=sum("); code != 422 {
+		t.Fatalf("bad promql should be 422, got %d", code)
+	}
+	if code, body = get(t, a, "/nodes/a"); code != 200 || string(body) != "<html>spa</html>" {
+		t.Fatalf("SPA fallback: %d %q", code, body)
+	}
+	if code, _ = get(t, a, "/api/nope"); code != 404 {
+		t.Fatalf("unknown /api path should 404, got %d", code)
+	}
+	if code, _ = get(t, a, "/healthz"); code != 200 {
+		t.Fatalf("healthz: %d", code)
+	}
+}

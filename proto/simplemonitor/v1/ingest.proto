@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package simplemonitor.v1;
+
+option go_package = "simplemonitor/gen/simplemonitor/v1;simplemonitorv1";
+
+// Ingest is the agent -> server API.
+service Ingest {
+  // Register announces a node (identity + addresses). Called on every (re)connect.
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  // Push streams one MetricsBatch per collection interval.
+  rpc Push(stream MetricsBatch) returns (PushSummary);
+}
+
+message RegisterRequest {
+  string node_id = 1;
+  string hostname = 2;
+  repeated string ips = 3;
+  string os = 4;
+  string kernel = 5;
+  string version = 6;
+  bool flows_enabled = 7;
+}
+
+message RegisterResponse {
+  uint32 interval_ms = 1; // server-suggested interval (0 = keep agent default)
+}
+
+message PushSummary {
+  uint64 batches = 1;
+}
+
+// MetricsBatch carries values already converted to rates / deltas by the agent.
+message MetricsBatch {
+  string node_id = 1;
+  int64 ts_unix_ms = 2;
+  uint32 interval_ms = 3;
+  HostSample host = 4;
+  repeated DiskSample disks = 5;
+  repeated NetIfSample netifs = 6;
+  repeated FlowSample flows = 7;
+}
+
+message HostSample {
+  double cpu_total_pct = 1;
+  double cpu_user_pct = 2;
+  double cpu_system_pct = 3;
+  double cpu_iowait_pct = 4;
+  double load1 = 5;
+  double load5 = 6;
+  double load15 = 7;
+  uint64 mem_total = 8;
+  uint64 mem_used = 9;
+  uint64 mem_cached = 10;
+  uint64 swap_total = 11;
+  uint64 swap_used = 12;
+}
+
+message DiskSample {
+  string mount = 1;
+  string fstype = 2;
+  uint64 total = 3;
+  uint64 used = 4;
+  double read_bps = 5;
+  double write_bps = 6;
+  double read_iops = 7;
+  double write_iops = 8;
+}
+
+message NetIfSample {
+  string iface = 1;
+  double rx_bps = 2;
+  double tx_bps = 3;
+  double rx_pps = 4;
+  double tx_pps = 5;
+  double errors_ps = 6;
+  double drops_ps = 7;
+}
+
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_INGRESS = 1;
+  DIRECTION_EGRESS = 2;
+}
+
+// FlowSample is the traffic seen on the reporting node between two IPs during
+// one interval (deltas, not cumulative).
+message FlowSample {
+  string src_ip = 1;
+  string dst_ip = 2;
+  string proto = 3; // tcp | udp | icmp | other
+  Direction dir = 4;
+  uint64 bytes = 5;
+  uint64 packets = 6;
+}
