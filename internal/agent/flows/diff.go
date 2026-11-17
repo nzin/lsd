@@ -4,7 +4,7 @@ package flows
 import (
 	"net/netip"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // Key identifies one accounted flow (ports are deliberately not included).

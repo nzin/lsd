@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Multi-arch (linux/amd64 + linux/arm64) image holding the single simplemonitor binary.
+# Multi-arch (linux/amd64 + linux/arm64) image holding the single lsd binary.
 # The eBPF object (internal/agent/flows/flows_bpfel.o) is committed, so no clang is needed here.
 
 FROM --platform=$BUILDPLATFORM node:22-alpine AS web
@@ -18,8 +18,8 @@ RUN go mod download
 COPY . .
 COPY --from=web /web/dist ./web/dist
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-    go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/simplemonitor ./cmd/simplemonitor
+    go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/lsd ./cmd/lsd
 
 FROM gcr.io/distroless/static-debian12
-COPY --from=build /out/simplemonitor /simplemonitor
-ENTRYPOINT ["/simplemonitor"]
+COPY --from=build /out/lsd /lsd
+ENTRYPOINT ["/lsd"]

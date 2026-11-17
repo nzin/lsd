@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"simplemonitor/docs"
+	"lsd/docs"
 )
 
 func TestGetDocumentationExtractsEverything(t *testing.T) {
@@ -31,16 +31,16 @@ func TestGetDocumentationExtractsEverything(t *testing.T) {
 	if !strings.HasPrefix(read("install.pdf"), "%PDF-") {
 		t.Error("install.pdf is not a PDF")
 	}
-	if !strings.Contains(read("install.md"), "# simplemonitor installation guide") {
+	if !strings.Contains(read("install.md"), "# Linux Simple Diagnostic installation guide") {
 		t.Error("install.md has the wrong content")
 	}
-	if !strings.Contains(read("systemd/simplemonitor-server.service"), "ExecStart=/opt/simplemonitor/server/simplemonitor server") {
+	if !strings.Contains(read("systemd/lsd-server.service"), "ExecStart=/opt/lsd/server/lsd server") {
 		t.Error("server unit looks wrong")
 	}
-	if !strings.Contains(read("systemd/simplemonitor-agent.service"), "AmbientCapabilities=CAP_BPF") {
+	if !strings.Contains(read("systemd/lsd-agent.service"), "AmbientCapabilities=CAP_BPF") {
 		t.Error("agent unit looks wrong")
 	}
-	if !strings.Contains(read("config/agent.env"), "SM_SERVER=") || !strings.Contains(read("config/server.env"), "SM_RETENTION") {
+	if !strings.Contains(read("config/agent.env"), "LSD_SERVER=") || !strings.Contains(read("config/server.env"), "LSD_RETENTION") {
 		t.Error("example configs look wrong")
 	}
 	if got := strings.Count(out.String(), "wrote "); got != len(bundledFiles()) {
@@ -89,7 +89,7 @@ func TestGetDocumentationCommand(t *testing.T) {
 	}
 }
 
-// The guide must not drift from the code: every SM_* variable and --flag it mentions has to exist,
+// The guide must not drift from the code: every LSD_* variable and --flag it mentions has to exist,
 // and every variable / agent+server flag the code has has to be documented.
 func TestInstallGuideMatchesTheCode(t *testing.T) {
 	md, err := fs.ReadFile(docs.Files, "install.md")
@@ -104,7 +104,7 @@ func TestInstallGuideMatchesTheCode(t *testing.T) {
 
 	envs := map[string]bool{}
 	for _, m := range regexp.MustCompile(`env(?:Bool|Dur|List)?\("([A-Z_]+)"`).FindAllStringSubmatch(string(src), -1) {
-		envs["SM_"+m[1]] = true
+		envs["LSD_"+m[1]] = true
 	}
 	if len(envs) < 15 {
 		t.Fatalf("only found %d env vars in main.go, the pattern is probably stale", len(envs))

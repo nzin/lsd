@@ -2,16 +2,16 @@
 set -e
 
 if [ "$1" = "configure" ]; then
-    if ! getent passwd simplemonitor >/dev/null 2>&1; then
-        adduser --system --group --no-create-home --home /opt/simplemonitor \
-            --shell /usr/sbin/nologin --gecos "simplemonitor" simplemonitor
+    if ! getent passwd lsd >/dev/null 2>&1; then
+        adduser --system --group --no-create-home --home /opt/lsd \
+            --shell /usr/sbin/nologin --gecos "Linux Simple Diagnostic" lsd
     fi
     if [ -d /run/systemd/system ]; then
         systemctl daemon-reload || true
-        systemctl enable simplemonitor-agent.service >/dev/null 2>&1 || true
+        systemctl enable lsd-agent.service >/dev/null 2>&1 || true
         # also on upgrade: run the new binary
-        systemctl restart simplemonitor-agent.service \
-            || echo "simplemonitor-agent: could not start the service, see 'systemctl status simplemonitor-agent'" >&2
+        systemctl restart lsd-agent.service \
+            || echo "lsd-agent: could not start the service, see 'systemctl status lsd-agent'" >&2
     fi
 fi
 exit 0

@@ -18,13 +18,13 @@ export function applyTheme(choice: ThemeChoice) {
   themeChoice.value = choice
   if (choice === 'auto') document.documentElement.removeAttribute('data-theme')
   else document.documentElement.setAttribute('data-theme', choice)
-  try { localStorage.setItem('sm.theme', choice) } catch { /* storage unavailable */ }
+  try { localStorage.setItem('lsd.theme', choice) } catch { /* storage unavailable */ }
   themeVersion.value++
 }
 
 export function initTheme() {
   let saved: string | null = null
-  try { saved = localStorage.getItem('sm.theme') } catch { /* storage unavailable */ }
+  try { saved = localStorage.getItem('lsd.theme') } catch { /* storage unavailable */ }
   applyTheme(saved === 'light' || saved === 'dark' ? saved : 'auto')
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => themeVersion.value++)
 }

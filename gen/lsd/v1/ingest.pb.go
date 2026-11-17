@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v7.34.1
-// source: simplemonitor/v1/ingest.proto
+// source: lsd/v1/ingest.proto
 
-package simplemonitorv1
+package lsdv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -54,11 +54,11 @@ func (x Direction) String() string {
 }
 
 func (Direction) Descriptor() protoreflect.EnumDescriptor {
-	return file_simplemonitor_v1_ingest_proto_enumTypes[0].Descriptor()
+	return file_lsd_v1_ingest_proto_enumTypes[0].Descriptor()
 }
 
 func (Direction) Type() protoreflect.EnumType {
-	return &file_simplemonitor_v1_ingest_proto_enumTypes[0]
+	return &file_lsd_v1_ingest_proto_enumTypes[0]
 }
 
 func (x Direction) Number() protoreflect.EnumNumber {
@@ -67,7 +67,7 @@ func (x Direction) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Direction.Descriptor instead.
 func (Direction) EnumDescriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{0}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{0}
 }
 
 type RegisterRequest struct {
@@ -85,7 +85,7 @@ type RegisterRequest struct {
 
 func (x *RegisterRequest) Reset() {
 	*x = RegisterRequest{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[0]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -97,7 +97,7 @@ func (x *RegisterRequest) String() string {
 func (*RegisterRequest) ProtoMessage() {}
 
 func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[0]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,7 +110,7 @@ func (x *RegisterRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
 func (*RegisterRequest) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{0}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *RegisterRequest) GetNodeId() string {
@@ -171,7 +171,7 @@ type RegisterResponse struct {
 
 func (x *RegisterResponse) Reset() {
 	*x = RegisterResponse{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[1]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -183,7 +183,7 @@ func (x *RegisterResponse) String() string {
 func (*RegisterResponse) ProtoMessage() {}
 
 func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[1]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -196,7 +196,7 @@ func (x *RegisterResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
 func (*RegisterResponse) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{1}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *RegisterResponse) GetIntervalMs() uint32 {
@@ -215,7 +215,7 @@ type PushSummary struct {
 
 func (x *PushSummary) Reset() {
 	*x = PushSummary{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[2]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -227,7 +227,7 @@ func (x *PushSummary) String() string {
 func (*PushSummary) ProtoMessage() {}
 
 func (x *PushSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[2]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +240,7 @@ func (x *PushSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PushSummary.ProtoReflect.Descriptor instead.
 func (*PushSummary) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{2}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PushSummary) GetBatches() uint64 {
@@ -266,7 +266,7 @@ type MetricsBatch struct {
 
 func (x *MetricsBatch) Reset() {
 	*x = MetricsBatch{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[3]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +278,7 @@ func (x *MetricsBatch) String() string {
 func (*MetricsBatch) ProtoMessage() {}
 
 func (x *MetricsBatch) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[3]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -291,7 +291,7 @@ func (x *MetricsBatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MetricsBatch.ProtoReflect.Descriptor instead.
 func (*MetricsBatch) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{3}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *MetricsBatch) GetNodeId() string {
@@ -363,7 +363,7 @@ type HostSample struct {
 
 func (x *HostSample) Reset() {
 	*x = HostSample{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[4]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +375,7 @@ func (x *HostSample) String() string {
 func (*HostSample) ProtoMessage() {}
 
 func (x *HostSample) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[4]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +388,7 @@ func (x *HostSample) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HostSample.ProtoReflect.Descriptor instead.
 func (*HostSample) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{4}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *HostSample) GetCpuTotalPct() float64 {
@@ -491,7 +491,7 @@ type DiskSample struct {
 
 func (x *DiskSample) Reset() {
 	*x = DiskSample{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[5]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -503,7 +503,7 @@ func (x *DiskSample) String() string {
 func (*DiskSample) ProtoMessage() {}
 
 func (x *DiskSample) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[5]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -516,7 +516,7 @@ func (x *DiskSample) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DiskSample.ProtoReflect.Descriptor instead.
 func (*DiskSample) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{5}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DiskSample) GetMount() string {
@@ -590,7 +590,7 @@ type NetIfSample struct {
 
 func (x *NetIfSample) Reset() {
 	*x = NetIfSample{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[6]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -602,7 +602,7 @@ func (x *NetIfSample) String() string {
 func (*NetIfSample) ProtoMessage() {}
 
 func (x *NetIfSample) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[6]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -615,7 +615,7 @@ func (x *NetIfSample) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NetIfSample.ProtoReflect.Descriptor instead.
 func (*NetIfSample) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{6}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *NetIfSample) GetIface() string {
@@ -674,7 +674,7 @@ type FlowSample struct {
 	SrcIp         string                 `protobuf:"bytes,1,opt,name=src_ip,json=srcIp,proto3" json:"src_ip,omitempty"`
 	DstIp         string                 `protobuf:"bytes,2,opt,name=dst_ip,json=dstIp,proto3" json:"dst_ip,omitempty"`
 	Proto         string                 `protobuf:"bytes,3,opt,name=proto,proto3" json:"proto,omitempty"` // tcp | udp | icmp | other
-	Dir           Direction              `protobuf:"varint,4,opt,name=dir,proto3,enum=simplemonitor.v1.Direction" json:"dir,omitempty"`
+	Dir           Direction              `protobuf:"varint,4,opt,name=dir,proto3,enum=lsd.v1.Direction" json:"dir,omitempty"`
 	Bytes         uint64                 `protobuf:"varint,5,opt,name=bytes,proto3" json:"bytes,omitempty"`
 	Packets       uint64                 `protobuf:"varint,6,opt,name=packets,proto3" json:"packets,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -683,7 +683,7 @@ type FlowSample struct {
 
 func (x *FlowSample) Reset() {
 	*x = FlowSample{}
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[7]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -695,7 +695,7 @@ func (x *FlowSample) String() string {
 func (*FlowSample) ProtoMessage() {}
 
 func (x *FlowSample) ProtoReflect() protoreflect.Message {
-	mi := &file_simplemonitor_v1_ingest_proto_msgTypes[7]
+	mi := &file_lsd_v1_ingest_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -708,7 +708,7 @@ func (x *FlowSample) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FlowSample.ProtoReflect.Descriptor instead.
 func (*FlowSample) Descriptor() ([]byte, []int) {
-	return file_simplemonitor_v1_ingest_proto_rawDescGZIP(), []int{7}
+	return file_lsd_v1_ingest_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *FlowSample) GetSrcIp() string {
@@ -753,11 +753,11 @@ func (x *FlowSample) GetPackets() uint64 {
 	return 0
 }
 
-var File_simplemonitor_v1_ingest_proto protoreflect.FileDescriptor
+var File_lsd_v1_ingest_proto protoreflect.FileDescriptor
 
-const file_simplemonitor_v1_ingest_proto_rawDesc = "" +
+const file_lsd_v1_ingest_proto_rawDesc = "" +
 	"\n" +
-	"\x1dsimplemonitor/v1/ingest.proto\x12\x10simplemonitor.v1\"\xbf\x01\n" +
+	"\x13lsd/v1/ingest.proto\x12\x06lsd.v1\"\xbf\x01\n" +
 	"\x0fRegisterRequest\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1a\n" +
 	"\bhostname\x18\x02 \x01(\tR\bhostname\x12\x10\n" +
@@ -770,17 +770,17 @@ const file_simplemonitor_v1_ingest_proto_rawDesc = "" +
 	"\vinterval_ms\x18\x01 \x01(\rR\n" +
 	"intervalMs\"'\n" +
 	"\vPushSummary\x12\x18\n" +
-	"\abatches\x18\x01 \x01(\x04R\abatches\"\xb7\x02\n" +
+	"\abatches\x18\x01 \x01(\x04R\abatches\"\x8f\x02\n" +
 	"\fMetricsBatch\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1c\n" +
 	"\n" +
 	"ts_unix_ms\x18\x02 \x01(\x03R\btsUnixMs\x12\x1f\n" +
 	"\vinterval_ms\x18\x03 \x01(\rR\n" +
-	"intervalMs\x120\n" +
-	"\x04host\x18\x04 \x01(\v2\x1c.simplemonitor.v1.HostSampleR\x04host\x122\n" +
-	"\x05disks\x18\x05 \x03(\v2\x1c.simplemonitor.v1.DiskSampleR\x05disks\x125\n" +
-	"\x06netifs\x18\x06 \x03(\v2\x1d.simplemonitor.v1.NetIfSampleR\x06netifs\x122\n" +
-	"\x05flows\x18\a \x03(\v2\x1c.simplemonitor.v1.FlowSampleR\x05flows\"\xf5\x02\n" +
+	"intervalMs\x12&\n" +
+	"\x04host\x18\x04 \x01(\v2\x12.lsd.v1.HostSampleR\x04host\x12(\n" +
+	"\x05disks\x18\x05 \x03(\v2\x12.lsd.v1.DiskSampleR\x05disks\x12+\n" +
+	"\x06netifs\x18\x06 \x03(\v2\x13.lsd.v1.NetIfSampleR\x06netifs\x12(\n" +
+	"\x05flows\x18\a \x03(\v2\x12.lsd.v1.FlowSampleR\x05flows\"\xf5\x02\n" +
 	"\n" +
 	"HostSample\x12\"\n" +
 	"\rcpu_total_pct\x18\x01 \x01(\x01R\vcpuTotalPct\x12 \n" +
@@ -817,58 +817,58 @@ const file_simplemonitor_v1_ingest_proto_rawDesc = "" +
 	"\x06rx_pps\x18\x04 \x01(\x01R\x05rxPps\x12\x15\n" +
 	"\x06tx_pps\x18\x05 \x01(\x01R\x05txPps\x12\x1b\n" +
 	"\terrors_ps\x18\x06 \x01(\x01R\berrorsPs\x12\x19\n" +
-	"\bdrops_ps\x18\a \x01(\x01R\adropsPs\"\xaf\x01\n" +
+	"\bdrops_ps\x18\a \x01(\x01R\adropsPs\"\xa5\x01\n" +
 	"\n" +
 	"FlowSample\x12\x15\n" +
 	"\x06src_ip\x18\x01 \x01(\tR\x05srcIp\x12\x15\n" +
 	"\x06dst_ip\x18\x02 \x01(\tR\x05dstIp\x12\x14\n" +
-	"\x05proto\x18\x03 \x01(\tR\x05proto\x12-\n" +
-	"\x03dir\x18\x04 \x01(\x0e2\x1b.simplemonitor.v1.DirectionR\x03dir\x12\x14\n" +
+	"\x05proto\x18\x03 \x01(\tR\x05proto\x12#\n" +
+	"\x03dir\x18\x04 \x01(\x0e2\x11.lsd.v1.DirectionR\x03dir\x12\x14\n" +
 	"\x05bytes\x18\x05 \x01(\x04R\x05bytes\x12\x18\n" +
 	"\apackets\x18\x06 \x01(\x04R\apackets*S\n" +
 	"\tDirection\x12\x19\n" +
 	"\x15DIRECTION_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11DIRECTION_INGRESS\x10\x01\x12\x14\n" +
-	"\x10DIRECTION_EGRESS\x10\x022\xa4\x01\n" +
-	"\x06Ingest\x12Q\n" +
-	"\bRegister\x12!.simplemonitor.v1.RegisterRequest\x1a\".simplemonitor.v1.RegisterResponse\x12G\n" +
-	"\x04Push\x12\x1e.simplemonitor.v1.MetricsBatch\x1a\x1d.simplemonitor.v1.PushSummary(\x01B4Z2simplemonitor/gen/simplemonitor/v1;simplemonitorv1b\x06proto3"
+	"\x10DIRECTION_EGRESS\x10\x022|\n" +
+	"\x06Ingest\x12=\n" +
+	"\bRegister\x12\x17.lsd.v1.RegisterRequest\x1a\x18.lsd.v1.RegisterResponse\x123\n" +
+	"\x04Push\x12\x14.lsd.v1.MetricsBatch\x1a\x13.lsd.v1.PushSummary(\x01B\x16Z\x14lsd/gen/lsd/v1;lsdv1b\x06proto3"
 
 var (
-	file_simplemonitor_v1_ingest_proto_rawDescOnce sync.Once
-	file_simplemonitor_v1_ingest_proto_rawDescData []byte
+	file_lsd_v1_ingest_proto_rawDescOnce sync.Once
+	file_lsd_v1_ingest_proto_rawDescData []byte
 )
 
-func file_simplemonitor_v1_ingest_proto_rawDescGZIP() []byte {
-	file_simplemonitor_v1_ingest_proto_rawDescOnce.Do(func() {
-		file_simplemonitor_v1_ingest_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_simplemonitor_v1_ingest_proto_rawDesc), len(file_simplemonitor_v1_ingest_proto_rawDesc)))
+func file_lsd_v1_ingest_proto_rawDescGZIP() []byte {
+	file_lsd_v1_ingest_proto_rawDescOnce.Do(func() {
+		file_lsd_v1_ingest_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_lsd_v1_ingest_proto_rawDesc), len(file_lsd_v1_ingest_proto_rawDesc)))
 	})
-	return file_simplemonitor_v1_ingest_proto_rawDescData
+	return file_lsd_v1_ingest_proto_rawDescData
 }
 
-var file_simplemonitor_v1_ingest_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_simplemonitor_v1_ingest_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
-var file_simplemonitor_v1_ingest_proto_goTypes = []any{
-	(Direction)(0),           // 0: simplemonitor.v1.Direction
-	(*RegisterRequest)(nil),  // 1: simplemonitor.v1.RegisterRequest
-	(*RegisterResponse)(nil), // 2: simplemonitor.v1.RegisterResponse
-	(*PushSummary)(nil),      // 3: simplemonitor.v1.PushSummary
-	(*MetricsBatch)(nil),     // 4: simplemonitor.v1.MetricsBatch
-	(*HostSample)(nil),       // 5: simplemonitor.v1.HostSample
-	(*DiskSample)(nil),       // 6: simplemonitor.v1.DiskSample
-	(*NetIfSample)(nil),      // 7: simplemonitor.v1.NetIfSample
-	(*FlowSample)(nil),       // 8: simplemonitor.v1.FlowSample
+var file_lsd_v1_ingest_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_lsd_v1_ingest_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_lsd_v1_ingest_proto_goTypes = []any{
+	(Direction)(0),           // 0: lsd.v1.Direction
+	(*RegisterRequest)(nil),  // 1: lsd.v1.RegisterRequest
+	(*RegisterResponse)(nil), // 2: lsd.v1.RegisterResponse
+	(*PushSummary)(nil),      // 3: lsd.v1.PushSummary
+	(*MetricsBatch)(nil),     // 4: lsd.v1.MetricsBatch
+	(*HostSample)(nil),       // 5: lsd.v1.HostSample
+	(*DiskSample)(nil),       // 6: lsd.v1.DiskSample
+	(*NetIfSample)(nil),      // 7: lsd.v1.NetIfSample
+	(*FlowSample)(nil),       // 8: lsd.v1.FlowSample
 }
-var file_simplemonitor_v1_ingest_proto_depIdxs = []int32{
-	5, // 0: simplemonitor.v1.MetricsBatch.host:type_name -> simplemonitor.v1.HostSample
-	6, // 1: simplemonitor.v1.MetricsBatch.disks:type_name -> simplemonitor.v1.DiskSample
-	7, // 2: simplemonitor.v1.MetricsBatch.netifs:type_name -> simplemonitor.v1.NetIfSample
-	8, // 3: simplemonitor.v1.MetricsBatch.flows:type_name -> simplemonitor.v1.FlowSample
-	0, // 4: simplemonitor.v1.FlowSample.dir:type_name -> simplemonitor.v1.Direction
-	1, // 5: simplemonitor.v1.Ingest.Register:input_type -> simplemonitor.v1.RegisterRequest
-	4, // 6: simplemonitor.v1.Ingest.Push:input_type -> simplemonitor.v1.MetricsBatch
-	2, // 7: simplemonitor.v1.Ingest.Register:output_type -> simplemonitor.v1.RegisterResponse
-	3, // 8: simplemonitor.v1.Ingest.Push:output_type -> simplemonitor.v1.PushSummary
+var file_lsd_v1_ingest_proto_depIdxs = []int32{
+	5, // 0: lsd.v1.MetricsBatch.host:type_name -> lsd.v1.HostSample
+	6, // 1: lsd.v1.MetricsBatch.disks:type_name -> lsd.v1.DiskSample
+	7, // 2: lsd.v1.MetricsBatch.netifs:type_name -> lsd.v1.NetIfSample
+	8, // 3: lsd.v1.MetricsBatch.flows:type_name -> lsd.v1.FlowSample
+	0, // 4: lsd.v1.FlowSample.dir:type_name -> lsd.v1.Direction
+	1, // 5: lsd.v1.Ingest.Register:input_type -> lsd.v1.RegisterRequest
+	4, // 6: lsd.v1.Ingest.Push:input_type -> lsd.v1.MetricsBatch
+	2, // 7: lsd.v1.Ingest.Register:output_type -> lsd.v1.RegisterResponse
+	3, // 8: lsd.v1.Ingest.Push:output_type -> lsd.v1.PushSummary
 	7, // [7:9] is the sub-list for method output_type
 	5, // [5:7] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name
@@ -876,27 +876,27 @@ var file_simplemonitor_v1_ingest_proto_depIdxs = []int32{
 	0, // [0:5] is the sub-list for field type_name
 }
 
-func init() { file_simplemonitor_v1_ingest_proto_init() }
-func file_simplemonitor_v1_ingest_proto_init() {
-	if File_simplemonitor_v1_ingest_proto != nil {
+func init() { file_lsd_v1_ingest_proto_init() }
+func file_lsd_v1_ingest_proto_init() {
+	if File_lsd_v1_ingest_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_simplemonitor_v1_ingest_proto_rawDesc), len(file_simplemonitor_v1_ingest_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_lsd_v1_ingest_proto_rawDesc), len(file_lsd_v1_ingest_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_simplemonitor_v1_ingest_proto_goTypes,
-		DependencyIndexes: file_simplemonitor_v1_ingest_proto_depIdxs,
-		EnumInfos:         file_simplemonitor_v1_ingest_proto_enumTypes,
-		MessageInfos:      file_simplemonitor_v1_ingest_proto_msgTypes,
+		GoTypes:           file_lsd_v1_ingest_proto_goTypes,
+		DependencyIndexes: file_lsd_v1_ingest_proto_depIdxs,
+		EnumInfos:         file_lsd_v1_ingest_proto_enumTypes,
+		MessageInfos:      file_lsd_v1_ingest_proto_msgTypes,
 	}.Build()
-	File_simplemonitor_v1_ingest_proto = out.File
-	file_simplemonitor_v1_ingest_proto_goTypes = nil
-	file_simplemonitor_v1_ingest_proto_depIdxs = nil
+	File_lsd_v1_ingest_proto = out.File
+	file_lsd_v1_ingest_proto_goTypes = nil
+	file_lsd_v1_ingest_proto_depIdxs = nil
 }

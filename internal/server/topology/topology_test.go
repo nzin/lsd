@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 func flow(src, dst string, dir pb.Direction, bytes uint64) *pb.FlowSample {

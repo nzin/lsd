@@ -6,7 +6,7 @@ import (
 	"errors"
 	"log/slog"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // Collector is a stub: eBPF flow capture only exists on Linux.

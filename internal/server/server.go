@@ -15,13 +15,13 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/netutil"
-	"simplemonitor/internal/server/api"
-	"simplemonitor/internal/server/ingest"
-	"simplemonitor/internal/server/store"
-	"simplemonitor/internal/server/topology"
-	"simplemonitor/web"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/netutil"
+	"lsd/internal/server/api"
+	"lsd/internal/server/ingest"
+	"lsd/internal/server/store"
+	"lsd/internal/server/topology"
+	"lsd/web"
 )
 
 type Config struct {

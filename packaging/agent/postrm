@@ -4,6 +4,6 @@ set -e
 if [ -d /run/systemd/system ]; then
     systemctl daemon-reload || true
 fi
-# The node id (/var/lib/simplemonitor-agent) and the 'simplemonitor' user are
+# The node id (/var/lib/lsd-agent) and the 'lsd' user are
 # deliberately kept, even on purge. Remove them by hand if you really want to.
 exit 0

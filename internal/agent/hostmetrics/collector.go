@@ -13,7 +13,7 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 	"github.com/shirou/gopsutil/v4/net"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // Scope selects where CPU / memory / disk-IO numbers come from.

@@ -10,8 +10,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"simplemonitor/docs"
-	"simplemonitor/packaging"
+	"lsd/docs"
+	"lsd/packaging"
 )
 
 // bundled is one embedded file and where it lands in the target directory.
@@ -26,8 +26,8 @@ func bundledFiles() []bundled {
 	return []bundled{
 		{docs.Files, "install.pdf", "install.pdf"},
 		{docs.Files, "install.md", "install.md"},
-		{packaging.Files, "server/simplemonitor-server.service", "systemd/simplemonitor-server.service"},
-		{packaging.Files, "agent/simplemonitor-agent.service", "systemd/simplemonitor-agent.service"},
+		{packaging.Files, "server/lsd-server.service", "systemd/lsd-server.service"},
+		{packaging.Files, "agent/lsd-agent.service", "systemd/lsd-agent.service"},
 		{packaging.Files, "server/server.env", "config/server.env"},
 		{packaging.Files, "agent/agent.env", "config/agent.env"},
 	}
@@ -46,7 +46,7 @@ func getDocumentationCmd() *cobra.Command {
   config/*.env                     the example configuration files
 
 Existing files are never overwritten unless --force is given.`,
-		Example: "  simplemonitor get-documentation --directory ./sm-docs",
+		Example: "  lsd get-documentation --directory ./lsd-docs",
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			return extractDocumentation(dir, force, cmd.OutOrStdout())

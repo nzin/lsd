@@ -15,8 +15,8 @@ import (
 	"github.com/prometheus/prometheus/storage"
 	"github.com/prometheus/prometheus/tsdb"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/server/topology"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/server/topology"
 )
 
 type Options struct {
@@ -119,27 +119,27 @@ func (s *Store) AppendBatch(ctx context.Context, b *pb.MetricsBatch, edges []top
 
 	lat := Latest{At: ts}
 	if h := b.Host; h != nil {
-		add("sm_cpu_percent", h.CpuTotalPct, "mode", "total")
-		add("sm_cpu_percent", h.CpuUserPct, "mode", "user")
-		add("sm_cpu_percent", h.CpuSystemPct, "mode", "system")
-		add("sm_cpu_percent", h.CpuIowaitPct, "mode", "iowait")
-		add("sm_load", h.Load1, "period", "1")
-		add("sm_load", h.Load5, "period", "5")
-		add("sm_load", h.Load15, "period", "15")
-		add("sm_mem_bytes", float64(h.MemTotal), "kind", "total")
-		add("sm_mem_bytes", float64(h.MemUsed), "kind", "used")
-		add("sm_mem_bytes", float64(h.MemCached), "kind", "cached")
-		add("sm_mem_bytes", float64(h.SwapTotal), "kind", "swap_total")
-		add("sm_mem_bytes", float64(h.SwapUsed), "kind", "swap_used")
+		add("lsd_cpu_percent", h.CpuTotalPct, "mode", "total")
+		add("lsd_cpu_percent", h.CpuUserPct, "mode", "user")
+		add("lsd_cpu_percent", h.CpuSystemPct, "mode", "system")
+		add("lsd_cpu_percent", h.CpuIowaitPct, "mode", "iowait")
+		add("lsd_load", h.Load1, "period", "1")
+		add("lsd_load", h.Load5, "period", "5")
+		add("lsd_load", h.Load15, "period", "15")
+		add("lsd_mem_bytes", float64(h.MemTotal), "kind", "total")
+		add("lsd_mem_bytes", float64(h.MemUsed), "kind", "used")
+		add("lsd_mem_bytes", float64(h.MemCached), "kind", "cached")
+		add("lsd_mem_bytes", float64(h.SwapTotal), "kind", "swap_total")
+		add("lsd_mem_bytes", float64(h.SwapUsed), "kind", "swap_used")
 		lat.CPU, lat.Load1, lat.MemUsed, lat.MemTotal = h.CpuTotalPct, h.Load1, h.MemUsed, h.MemTotal
 	}
 	for _, d := range b.Disks {
-		add("sm_disk_bytes", float64(d.Total), "mount", d.Mount, "kind", "total")
-		add("sm_disk_bytes", float64(d.Used), "mount", d.Mount, "kind", "used")
-		add("sm_disk_io_bps", d.ReadBps, "mount", d.Mount, "op", "read")
-		add("sm_disk_io_bps", d.WriteBps, "mount", d.Mount, "op", "write")
-		add("sm_disk_iops", d.ReadIops, "mount", d.Mount, "op", "read")
-		add("sm_disk_iops", d.WriteIops, "mount", d.Mount, "op", "write")
+		add("lsd_disk_bytes", float64(d.Total), "mount", d.Mount, "kind", "total")
+		add("lsd_disk_bytes", float64(d.Used), "mount", d.Mount, "kind", "used")
+		add("lsd_disk_io_bps", d.ReadBps, "mount", d.Mount, "op", "read")
+		add("lsd_disk_io_bps", d.WriteBps, "mount", d.Mount, "op", "write")
+		add("lsd_disk_iops", d.ReadIops, "mount", d.Mount, "op", "read")
+		add("lsd_disk_iops", d.WriteIops, "mount", d.Mount, "op", "write")
 		if d.Total > 0 {
 			if p := float64(d.Used) / float64(d.Total) * 100; p > lat.DiskMaxPct {
 				lat.DiskMaxPct = p
@@ -147,15 +147,15 @@ func (s *Store) AppendBatch(ctx context.Context, b *pb.MetricsBatch, edges []top
 		}
 	}
 	for _, n := range b.Netifs {
-		add("sm_net_bps", n.RxBps, "iface", n.Iface, "dir", "rx")
-		add("sm_net_bps", n.TxBps, "iface", n.Iface, "dir", "tx")
-		add("sm_net_pps", n.RxPps, "iface", n.Iface, "dir", "rx")
-		add("sm_net_pps", n.TxPps, "iface", n.Iface, "dir", "tx")
-		add("sm_net_errors", n.ErrorsPs, "iface", n.Iface)
+		add("lsd_net_bps", n.RxBps, "iface", n.Iface, "dir", "rx")
+		add("lsd_net_bps", n.TxBps, "iface", n.Iface, "dir", "tx")
+		add("lsd_net_pps", n.RxPps, "iface", n.Iface, "dir", "rx")
+		add("lsd_net_pps", n.TxPps, "iface", n.Iface, "dir", "tx")
+		add("lsd_net_errors", n.ErrorsPs, "iface", n.Iface)
 		lat.RxBps += n.RxBps
 		lat.TxBps += n.TxBps
 	}
-	add("sm_node_up", 1)
+	add("lsd_node_up", 1)
 
 	// Flow counters: the agent sends deltas, series are monotonic totals.
 	// "node" on these series is the reporter; src/dst are resolved node ids.
@@ -176,8 +176,8 @@ func (s *Store) AppendBatch(ctx context.Context, b *pb.MetricsBatch, edges []top
 		}
 		s.mu.Unlock()
 		for _, p := range pts {
-			add("sm_flow_bytes_total", float64(p.tt[0]), "src", p.k.src, "dst", p.k.dst, "proto", p.k.proto)
-			add("sm_flow_packets_total", float64(p.tt[1]), "src", p.k.src, "dst", p.k.dst, "proto", p.k.proto)
+			add("lsd_flow_bytes_total", float64(p.tt[0]), "src", p.k.src, "dst", p.k.dst, "proto", p.k.proto)
+			add("lsd_flow_packets_total", float64(p.tt[1]), "src", p.k.src, "dst", p.k.dst, "proto", p.k.proto)
 		}
 	}
 
@@ -252,7 +252,7 @@ func (s *Store) FlowEdges(ctx context.Context, from, to time.Time) ([]HistEdge, 
 	rng := fmt.Sprintf("%ds", int(secs))
 	type k struct{ s, d string }
 	m := map[k]*HistEdge{}
-	for i, metric := range []string{"sm_flow_bytes_total", "sm_flow_packets_total"} {
+	for i, metric := range []string{"lsd_flow_bytes_total", "lsd_flow_packets_total"} {
 		v, err := s.Query(ctx, fmt.Sprintf(`sum by (src,dst,proto)(increase(%s[%s]))`, metric, rng), to)
 		if err != nil {
 			return nil, err

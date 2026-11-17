@@ -68,7 +68,7 @@ func TestCgroupSnapshot(t *testing.T) {
 	w("io.stat", "8:0 rbytes=10 wbytes=20 rios=1 wios=2\n")
 	w("memory.swap.current", "777\n")
 	w("memory.swap.max", "max\n")
-	t.Setenv("SM_CGROUP_ROOT", dir)
+	t.Setenv("LSD_CGROUP_ROOT", dir)
 	c := newCgroupReader()
 	if !c.available() {
 		t.Fatal("should be available")

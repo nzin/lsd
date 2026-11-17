@@ -17,7 +17,7 @@ function nextTheme() { applyTheme(themes[(themes.indexOf(themeChoice.value) + 1)
     <div class="page bar">
       <router-link to="/" class="brand">
         <svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 12l4-5 3 3 4-7 3 5" fill="none" stroke="var(--series-1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        simplemonitor
+        Linux Simple Diagnostic
       </router-link>
       <nav aria-label="Main">
         <router-link to="/" :class="{ active: route.path === '/' || route.path.startsWith('/nodes/') }">Metrics</router-link>

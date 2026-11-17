@@ -1,4 +1,4 @@
-# simplemonitor demo: 1 server + 2 agents (+ traffic generators so the topology has something to show).
+# lsd demo: 1 server + 2 agents (+ traffic generators so the topology has something to show).
 #
 #   docker compose -f deploy/docker-compose.yml up -d --build
 #   open http://localhost:8080
@@ -6,10 +6,11 @@
 # Containers share the Docker host's kernel, but each agent runs in its own network namespace and
 # cgroup, so flows are captured per container (TC eBPF on its eth0) and CPU/memory come from the
 # container's own cgroup (--metrics-scope cgroup).
-name: simplemonitor
+name: lsd
 
 x-agent: &agent
-  image: simplemonitor:dev
+  image: lsd:dev
+  pull_policy: never   # built locally by the server service, never pulled
   restart: unless-stopped
   depends_on:
     server:
@@ -23,15 +24,15 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile
-    image: simplemonitor:dev
+    image: lsd:dev
     hostname: server
     command: ["server", "--data-dir", "/data"]
     ports:
       - "8080:8080"      # web UI + API
     volumes:
-      - sm-data:/data
+      - lsd-data:/data
     healthcheck:
-      test: ["CMD", "/simplemonitor", "healthcheck", "--url", "http://127.0.0.1:8080/healthz"]
+      test: ["CMD", "/lsd", "healthcheck", "--url", "http://127.0.0.1:8080/healthz"]
       interval: 5s
       timeout: 4s
       retries: 10
@@ -53,14 +54,16 @@ services:
   #   agent-2 -> agent-1: ~400 KB/s steady (thin edge)               [loadgen-1 pulls from agent-2]
   # loadgen-2 also polls the server's API every second (small agent-2 <-> server edge).
   loadgen-1:
-    image: simplemonitor:dev
+    image: lsd:dev
+    pull_policy: never
     network_mode: "service:agent-1"
     depends_on: [agent-1, agent-2]
     restart: unless-stopped
     command: ["loadgen", "--listen", ":9000", "--peer", "http://agent-2:9000", "--rate", "400KB/s", "--pattern", "steady"]
 
   loadgen-2:
-    image: simplemonitor:dev
+    image: lsd:dev
+    pull_policy: never
     network_mode: "service:agent-2"
     depends_on: [agent-1, agent-2]
     restart: unless-stopped
@@ -68,4 +71,4 @@ services:
               "--ping", "http://server:8080/api/nodes", "--ping-interval", "1s"]
 
 volumes:
-  sm-data:
+  lsd-data:

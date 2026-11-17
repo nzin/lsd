@@ -20,8 +20,8 @@ import (
 	"github.com/prometheus/prometheus/model/labels"
 	"github.com/prometheus/prometheus/promql"
 
-	"simplemonitor/internal/server/store"
-	"simplemonitor/internal/server/topology"
+	"lsd/internal/server/store"
+	"lsd/internal/server/topology"
 )
 
 // ServerNodeID is the pseudo-node representing the server itself in the graph.
@@ -164,37 +164,37 @@ type metricDef struct {
 // nm is a ready-made node matcher (node=~"..."), w a range window like "15s".
 var metricDefs = map[string]metricDef{
 	"cpu": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`avg_over_time(sm_cpu_percent{mode="total",%s}[%s])`, nm, w)
+		return fmt.Sprintf(`avg_over_time(lsd_cpu_percent{mode="total",%s}[%s])`, nm, w)
 	}},
 	"cpu_modes": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`avg_over_time(sm_cpu_percent{mode=~"user|system|iowait",%s}[%s])`, nm, w)
+		return fmt.Sprintf(`avg_over_time(lsd_cpu_percent{mode=~"user|system|iowait",%s}[%s])`, nm, w)
 	}},
 	"load": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`avg_over_time(sm_load{%s}[%s])`, nm, w)
+		return fmt.Sprintf(`avg_over_time(lsd_load{%s}[%s])`, nm, w)
 	}},
 	"mem_pct": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`100 * avg_over_time(sm_mem_bytes{kind="used",%s}[%s]) / ignoring(kind) avg_over_time(sm_mem_bytes{kind="total",%s}[%s])`, nm, w, nm, w)
+		return fmt.Sprintf(`100 * avg_over_time(lsd_mem_bytes{kind="used",%s}[%s]) / ignoring(kind) avg_over_time(lsd_mem_bytes{kind="total",%s}[%s])`, nm, w, nm, w)
 	}},
 	"mem_bytes": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`avg_over_time(sm_mem_bytes{kind=~"used|cached|swap_used",%s}[%s])`, nm, w)
+		return fmt.Sprintf(`avg_over_time(lsd_mem_bytes{kind=~"used|cached|swap_used",%s}[%s])`, nm, w)
 	}},
 	// Swap used / total. clamp_min avoids 0/0 on machines without swap (they show 0%, not "no data").
 	"swap_pct": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`100 * avg_over_time(sm_mem_bytes{kind="swap_used",%s}[%s]) / ignoring(kind) clamp_min(avg_over_time(sm_mem_bytes{kind="swap_total",%s}[%s]), 1)`, nm, w, nm, w)
+		return fmt.Sprintf(`100 * avg_over_time(lsd_mem_bytes{kind="swap_used",%s}[%s]) / ignoring(kind) clamp_min(avg_over_time(lsd_mem_bytes{kind="swap_total",%s}[%s]), 1)`, nm, w, nm, w)
 	}},
 	// Number of agents that pushed within the window (a single unlabeled series).
 	"agents": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`count(count_over_time(sm_node_up{%s}[%s]))`, nm, w)
+		return fmt.Sprintf(`count(count_over_time(lsd_node_up{%s}[%s]))`, nm, w)
 	}},
 	"disk_pct": {func(nm, w string, _ bool) string {
-		return fmt.Sprintf(`100 * avg_over_time(sm_disk_bytes{kind="used",%s}[%s]) / ignoring(kind) avg_over_time(sm_disk_bytes{kind="total",%s}[%s])`, nm, w, nm, w)
+		return fmt.Sprintf(`100 * avg_over_time(lsd_disk_bytes{kind="used",%s}[%s]) / ignoring(kind) avg_over_time(lsd_disk_bytes{kind="total",%s}[%s])`, nm, w, nm, w)
 	}},
 	"disk_io": {func(nm, w string, single bool) string {
 		by := "node,op"
 		if single {
 			by = "node,mount,op"
 		}
-		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_disk_io_bps{%s}[%s]))`, by, nm, w)
+		return fmt.Sprintf(`sum by (%s)(avg_over_time(lsd_disk_io_bps{%s}[%s]))`, by, nm, w)
 	}},
 	// Disk operations per second. All nodes: one total (read+write) line per node; single node: per filesystem and op.
 	"disk_iops": {func(nm, w string, single bool) string {
@@ -202,21 +202,21 @@ var metricDefs = map[string]metricDef{
 		if single {
 			by = "node,mount,op"
 		}
-		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_disk_iops{%s}[%s]))`, by, nm, w)
+		return fmt.Sprintf(`sum by (%s)(avg_over_time(lsd_disk_iops{%s}[%s]))`, by, nm, w)
 	}},
 	"net_bps": {func(nm, w string, single bool) string {
 		by := "node,dir"
 		if single {
 			by = "node,iface,dir"
 		}
-		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_net_bps{%s}[%s]))`, by, nm, w)
+		return fmt.Sprintf(`sum by (%s)(avg_over_time(lsd_net_bps{%s}[%s]))`, by, nm, w)
 	}},
 	"net_pps": {func(nm, w string, single bool) string {
 		by := "node,dir"
 		if single {
 			by = "node,iface,dir"
 		}
-		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_net_pps{%s}[%s]))`, by, nm, w)
+		return fmt.Sprintf(`sum by (%s)(avg_over_time(lsd_net_pps{%s}[%s]))`, by, nm, w)
 	}},
 }
 

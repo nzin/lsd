@@ -1,14 +1,14 @@
-Package: simplemonitor-server
+Package: lsd-server
 Version: @VERSION@
 Architecture: @ARCH@
-Maintainer: simplemonitor <root@localhost>
+Maintainer: Linux Simple Diagnostic <root@localhost>
 Installed-Size: @SIZE@
 Depends: adduser
 Recommends: systemd
-Suggests: simplemonitor-agent
+Suggests: lsd-agent
 Section: admin
 Priority: optional
-Description: simplemonitor server (metrics storage, API and web UI)
- Receives metrics from simplemonitor agents over gRPC, stores them in an
- embedded time-series database and serves the web UI and API on port 8080.
- Installed in /opt/simplemonitor/server and run as a systemd service.
+Description: Linux Simple Diagnostic server (metrics storage, API and web UI)
+ Receives metrics from Linux Simple Diagnostic agents over gRPC, stores them in
+ an embedded time-series database and serves the web UI and API on port 8080.
+ Installed in /opt/lsd/server and run as a systemd service.

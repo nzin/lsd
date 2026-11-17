@@ -1,14 +1,14 @@
-Package: simplemonitor-agent
+Package: lsd-agent
 Version: @VERSION@
 Architecture: @ARCH@
-Maintainer: simplemonitor <root@localhost>
+Maintainer: Linux Simple Diagnostic <root@localhost>
 Installed-Size: @SIZE@
 Depends: adduser
 Recommends: systemd
 Section: admin
 Priority: optional
-Description: simplemonitor agent (host metrics and eBPF network flows)
+Description: Linux Simple Diagnostic agent (host metrics and eBPF network flows)
  Collects CPU, memory, disk and network metrics and, with eBPF, host-to-host
- traffic volumes, and sends them to a simplemonitor server over gRPC.
- Installed in /opt/simplemonitor/agent and run as a systemd service. Needs
+ traffic volumes, and sends them to a Linux Simple Diagnostic server over gRPC.
+ Installed in /opt/lsd/agent and run as a systemd service. Needs
  Linux 5.8 or newer for the capabilities it uses (CAP_BPF, CAP_PERFMON).

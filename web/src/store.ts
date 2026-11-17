@@ -18,13 +18,13 @@ function save(key: string, v: string) {
   try { localStorage.setItem(key, v) } catch { /* storage unavailable */ }
 }
 
-const savedRange = load('sm.range', '1h')
+const savedRange = load('lsd.range', '1h')
 export const range = ref(RANGES.some(r => r.key === savedRange) ? savedRange : '1h')
 export const rangeSec = computed(() => RANGES.find(r => r.key === range.value)!.sec)
-export function setRange(k: string) { range.value = k; save('sm.range', k) }
+export function setRange(k: string) { range.value = k; save('lsd.range', k) }
 
-export const autoRefresh = ref(load('sm.auto', '1') === '1')
-export function setAutoRefresh(v: boolean) { autoRefresh.value = v; save('sm.auto', v ? '1' : '0') }
+export const autoRefresh = ref(load('lsd.auto', '1') === '1')
+export function setAutoRefresh(v: boolean) { autoRefresh.value = v; save('lsd.auto', v ? '1' : '0') }
 
 /** Incremented on the refresh cadence; charts watch it to refetch. */
 export const refreshTick = ref(0)

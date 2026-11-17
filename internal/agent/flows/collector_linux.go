@@ -17,7 +17,7 @@ import (
 	"github.com/vishvananda/netlink"
 	"golang.org/x/sys/unix"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // Collector loads the TC program, attaches it to eligible interfaces and turns
@@ -146,8 +146,8 @@ func (c *Collector) attachClsact(idx int, a *attachment) error {
 		prog   *ebpf.Program
 		name   string
 	}{
-		{netlink.HANDLE_MIN_INGRESS, c.objs.TcIngress, "sm_ingress"},
-		{netlink.HANDLE_MIN_EGRESS, c.objs.TcEgress, "sm_egress"},
+		{netlink.HANDLE_MIN_INGRESS, c.objs.TcIngress, "lsd_ingress"},
+		{netlink.HANDLE_MIN_EGRESS, c.objs.TcEgress, "lsd_egress"},
 	} {
 		flt := &netlink.BpfFilter{
 			FilterAttrs:  netlink.FilterAttrs{LinkIndex: idx, Parent: f.parent, Handle: 1, Protocol: unix.ETH_P_ALL, Priority: 1},

@@ -10,9 +10,9 @@ import (
 	"testing/fstest"
 	"time"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/server/store"
-	"simplemonitor/internal/server/topology"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/server/store"
+	"lsd/internal/server/topology"
 )
 
 func newAPI(t *testing.T) (*API, *store.Store) {
@@ -187,7 +187,7 @@ func TestNodesPromAndStatic(t *testing.T) {
 	if code != 200 || json.Unmarshal(body, &nodes) != nil || len(nodes) != 1 || !nodes[0].Online || nodes[0].Latest == nil {
 		t.Fatalf("nodes: %d %s", code, body)
 	}
-	if code, body = get(t, a, "/api/v1/query?query=sm_node_up"); code != 200 {
+	if code, body = get(t, a, "/api/v1/query?query=lsd_node_up"); code != 200 {
 		t.Fatalf("instant query: %d %s", code, body)
 	}
 	if code, _ = get(t, a, "/api/v1/query?query=sum("); code != 422 {

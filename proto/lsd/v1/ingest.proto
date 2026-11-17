@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package simplemonitor.v1;
+package lsd.v1;
 
-option go_package = "simplemonitor/gen/simplemonitor/v1;simplemonitorv1";
+option go_package = "lsd/gen/lsd/v1;lsdv1";
 
 // Ingest is the agent -> server API.
 service Ingest {

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"sync"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // ExternalOther groups the long tail of external endpoints (cardinality guard).

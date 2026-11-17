@@ -1,6 +1,22 @@
-# simplemonitor
+# Linux Simple Diagnostic (`lsd`)
 
-A small host + network monitor in one Go binary. Run it as an **agent** on each Linux machine or as the **server**.
+**Linux Simple Diagnostic** gathers the basic metrics of a cluster of Linux machines and turns them into a clear, live web dashboard.
+
+For every machine you see how busy it is (CPU, memory, swap, disk usage and IOPS, load average, network throughput), from the last few minutes up to 30 days, all machines side by side or one at a time. And you see how the machines talk to each other: a live map of the traffic between your hosts, with an arrow per direction that gets wider as the traffic grows.
+
+It is deliberately small: one program, `lsd`, that you run as a light **agent** on every machine and as one **server** that stores the data and serves the dashboard. There is no database to run and no Prometheus or Grafana to wire up. It is a quick way to answer "what is going on across my machines right now?", not an alerting or log platform.
+
+## What it looks like
+
+![The Nodes page: the metrics of every machine](docs/images/metrics.png)
+
+*Metrics: the charts of all the machines side by side (or of a single machine, chosen in the drop-down), for any period from 15 minutes to 30 days.*
+
+![The live topology](docs/images/topology.png)
+
+*Topology: the live traffic between hosts. An arrow shows the direction, its width follows the volume, and the colours match the charts. Both screenshots show a small demo cluster of four machines.*
+
+## The pieces
 
 * **Agents** collect CPU / memory / disk / network metrics and, with **eBPF**, host-to-host traffic volume. They push everything to the server over **gRPC**.
 * The **server** stores metrics in an embedded **Prometheus TSDB** (pure Go, queryable with PromQL) and serves a **Vue 3** web UI: per-node and all-node charts for any period, and a **live topology** where edge direction is an arrow and edge width follows traffic volume.
@@ -37,10 +53,10 @@ Note: the **load average** is always host-wide (the kernel has no per-cgroup loa
 ## Run without Docker (Linux)
 
 ```bash
-make build                                   # builds the UI, then a static binary in bin/simplemonitor
+make build                                   # builds the UI, then a static binary in bin/lsd
 
-bin/simplemonitor server --data-dir ./data   # UI+API on :8080, gRPC on :7070
-sudo bin/simplemonitor agent --server <server-host>:7070
+bin/lsd server --data-dir ./data   # UI+API on :8080, gRPC on :7070
+sudo bin/lsd agent --server <server-host>:7070
 ```
 
 The agent needs `CAP_BPF`, `CAP_NET_ADMIN` and `CAP_PERFMON` (or root) for flow capture. Without them it logs a warning and keeps sending host metrics. Use `--no-flows` to disable capture on purpose.
@@ -48,7 +64,7 @@ It works on macOS for metrics only (no eBPF), which is handy for development.
 
 ### Configuration
 
-Every flag can also be set as `SM_<NAME>` (e.g. `SM_SERVER`, `SM_INTERVAL`, `SM_TOKEN`). `simplemonitor <cmd> --help` lists them all.
+Every flag can also be set as `LSD_<NAME>` (e.g. `LSD_SERVER`, `LSD_INTERVAL`, `LSD_TOKEN`). `lsd <cmd> --help` lists them all.
 
 | Agent | Default | |
 |---|---|---|
@@ -75,43 +91,56 @@ Every flag can also be set as `SM_<NAME>` (e.g. `SM_SERVER`, `SM_INTERVAL`, `SM_
 `make deb` builds two packages in `dist/` (`DEB_ARCH=amd64` by default, or `arm64`; `VERSION=` sets the version):
 
 ```bash
-make deb                    # dist/simplemonitor-server_0.1.0_amd64.deb + dist/simplemonitor-agent_0.1.0_amd64.deb
+make deb                    # dist/lsd-server_0.1.0_amd64.deb + dist/lsd-agent_0.1.0_amd64.deb
 make deb DEB_ARCH=arm64
 ```
 
 It works from macOS too (the binary is static; if `dpkg-deb` isn't installed it runs in a Debian container).
 
-| | `simplemonitor-server` | `simplemonitor-agent` |
+| | `lsd-server` | `lsd-agent` |
 |---|---|---|
-| Binary | `/opt/simplemonitor/server/simplemonitor` | `/opt/simplemonitor/agent/simplemonitor` |
-| systemd unit | `simplemonitor-server.service` | `simplemonitor-agent.service` |
-| Config (env file) | `/etc/simplemonitor/server.env` | `/etc/simplemonitor/agent.env` |
-| State | `/var/lib/simplemonitor-server` (metrics) | `/var/lib/simplemonitor-agent` (node id) |
-| Runs as | `simplemonitor` user, no capabilities | `simplemonitor` user + `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` |
+| Binary | `/opt/lsd/server/lsd` | `/opt/lsd/agent/lsd` |
+| systemd unit | `lsd-server.service` | `lsd-agent.service` |
+| Config (env file) | `/etc/lsd/server.env` | `/etc/lsd/agent.env` |
+| State | `/var/lib/lsd-server` (metrics) | `/var/lib/lsd-agent` (node id) |
+| Runs as | `lsd` user, no capabilities | `lsd` user + `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` |
 
 ```bash
-sudo apt install ./simplemonitor-server_0.1.0_amd64.deb          # UI on http://<host>:8080, gRPC on :7070
-sudo apt install ./simplemonitor-agent_0.1.0_amd64.deb
-sudoedit /etc/simplemonitor/agent.env                            # set SM_SERVER=<server-host>:7070
-sudo systemctl restart simplemonitor-agent
-journalctl -u simplemonitor-agent -f
+sudo apt install ./lsd-server_0.1.0_amd64.deb          # UI on http://<host>:8080, gRPC on :7070
+sudo apt install ./lsd-agent_0.1.0_amd64.deb
+sudoedit /etc/lsd/agent.env                            # set LSD_SERVER=<server-host>:7070
+sudo systemctl restart lsd-agent
+journalctl -u lsd-agent -f
 ```
 
-Both services are enabled and started on install. Every flag is a `SM_*` variable in the env files (commented examples are included); edit and `systemctl restart`. The two packages use separate directories, so they can be installed on the same machine. The agent unit relies on `CAP_BPF`, so it needs Linux 5.8+ (tested on a 7.0 kernel only); on older kernels you'd have to adjust the capabilities with `systemctl edit simplemonitor-agent`.
+Both services are enabled and started on install. Every flag is a `LSD_*` variable in the env files (commented examples are included); edit and `systemctl restart`. The two packages use separate directories, so they can be installed on the same machine. The agent unit relies on `CAP_BPF`, so it needs Linux 5.8+ (tested on a 7.0 kernel only); on older kernels you'd have to adjust the capabilities with `systemctl edit lsd-agent`.
 
-Removing a package stops and disables its service; the env file survives until `--purge`. Stored metrics (`/var/lib/simplemonitor-server`), the node id and the `simplemonitor` user are kept even on purge: delete them by hand if you want them gone.
+Removing a package stops and disables its service; the env file survives until `--purge`. Stored metrics (`/var/lib/lsd-server`), the node id and the `lsd` user are kept even on purge: delete them by hand if you want them gone.
+
+### Releases (GitHub Actions)
+
+[.github/workflows/packages.yml](.github/workflows/packages.yml) tests the code, builds the four packages (`lsd-server` and `lsd-agent`, each for `amd64` and `arm64`) and publishes them:
+
+```bash
+git tag v1.2.3 && git push origin v1.2.3
+```
+
+- **Pushing a tag** like `v1.2.3` or `v1.2.3-rc1` builds the packages with that version and creates a GitHub release holding the four `.deb` files and a `SHA256SUMS` file. A pre-release tag is published as a pre-release, and its Debian version is `1.2.3~rc1`, which sorts before `1.2.3`. Tags that don't look like `vX.Y.Z[-suffix]` are rejected.
+- **Pull requests and manual runs** run the tests and build the packages, which stay available as workflow artifacts for 14 days; nothing is published.
+
+Each architecture is checked before it is published (`.github/scripts/verify-debs.sh`: package names, control fields, installed files, maintainer scripts and, on amd64, the version the packaged binary reports). The ARM packages are cross-compiled, so no ARM runner is needed.
 
 ## Documentation
 
 The installation and configuration guide is [docs/install.md](docs/install.md), also as a PDF ([docs/install.pdf](docs/install.pdf)). Both are built into the program, so a machine that only has the binary can get them:
 
 ```bash
-simplemonitor get-documentation --directory ./sm-docs
+lsd get-documentation --directory ./lsd-docs
 ```
 
 This writes `install.pdf`, `install.md`, the systemd units (`systemd/`) and the example configuration files (`config/`), and refuses to overwrite existing files unless you add `--force`.
 
-After editing `docs/install.md`, regenerate the PDF (it uses the Eisvogel template in `docs/templates/`). The PDF is committed and embedded into the binary, and a test checks that every `SM_*` variable and flag the guide mentions exists in the code, and that every one the code has is documented.
+After editing `docs/install.md`, regenerate the PDF (it uses the Eisvogel template in `docs/templates/`). The PDF is committed and embedded into the binary, and a test checks that every `LSD_*` variable and flag the guide mentions exists in the code, and that every one the code has is documented.
 
 ```bash
 make docs-docker     # in an Ubuntu 24.04 container (the reference environment, needs only Docker)
@@ -133,7 +162,7 @@ The PDF is built with `pdflatex` and the standard Latin Modern fonts on purpose:
 
 **Topology.** A packet A→B is seen as egress on A and ingress on B. The server keeps the sender's view when the sender is a flow-reporting node, and the receiver's ingress view only for external/non-reporting senders, so nothing is double counted. IPs map to nodes through each agent's registered addresses; the rest are external. Opposite directions are separate edges. Edge width is log-scaled from 1 px (≤ 1 KB/s) to 24 px (≥ ~100 MB/s); the legend shows the same scale.
 
-**Storage.** Gauges are stored as-is (`sm_cpu_percent`, `sm_mem_bytes`, `sm_disk_bytes`, `sm_net_bps`, …). Flow volume is stored as monotonic counters `sm_flow_bytes_total{src,dst,proto}`, so history is a PromQL `increase()`. Replayed agent batches are accepted up to 2 h in the past (TSDB out-of-order window). Charts auto-select a step (~360 points per series).
+**Storage.** Gauges are stored as-is (`lsd_cpu_percent`, `lsd_mem_bytes`, `lsd_disk_bytes`, `lsd_net_bps`, …). Flow volume is stored as monotonic counters `lsd_flow_bytes_total{src,dst,proto}`, so history is a PromQL `increase()`. Replayed agent batches are accepted up to 2 h in the past (TSDB out-of-order window). Charts auto-select a step (~360 points per series).
 
 **API.**
 
@@ -158,4 +187,4 @@ make proto       # regenerate gRPC code (protoc + protoc-gen-go + protoc-gen-go-
 cd web && npm run dev   # Vite dev server, proxies /api to localhost:8080
 ```
 
-Layout: `cmd/simplemonitor` (CLI) · `internal/agent` (collection, eBPF, sender) · `internal/server` (ingest, store, topology, api) · `internal/loadgen` (demo traffic) · `bpf/` (C source) · `proto/` · `web/` (Vue app, embedded into the binary) · `deploy/` (Dockerfile, compose) · `docs/` (installation guide, embedded) · `packaging/` (systemd units, env files and maintainer scripts for the `.deb`s).
+Layout: `cmd/lsd` (CLI) · `internal/agent` (collection, eBPF, sender) · `internal/server` (ingest, store, topology, api) · `internal/loadgen` (demo traffic) · `bpf/` (C source) · `proto/` · `web/` (Vue app, embedded into the binary) · `deploy/` (Dockerfile, compose) · `docs/` (installation guide, embedded) · `packaging/` (systemd units, env files and maintainer scripts for the `.deb`s).

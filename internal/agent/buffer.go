@@ -3,7 +3,7 @@ package agent
 import (
 	"sync"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 // ring is a bounded FIFO of batches awaiting delivery; when full the oldest

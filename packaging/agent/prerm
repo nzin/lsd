@@ -4,8 +4,8 @@ set -e
 if [ -d /run/systemd/system ]; then
     case "$1" in
         remove|deconfigure)
-            systemctl stop simplemonitor-agent.service || true
-            systemctl disable simplemonitor-agent.service >/dev/null 2>&1 || true
+            systemctl stop lsd-agent.service || true
+            systemctl disable lsd-agent.service >/dev/null 2>&1 || true
             ;;
     esac
 fi

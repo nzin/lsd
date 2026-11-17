@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/shirou/gopsutil/v4/host"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/netutil"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/netutil"
 )
 
 // nodeID returns the explicit id, else a UUID persisted in stateDir, else a

@@ -10,7 +10,7 @@ import (
 
 	"go.etcd.io/bbolt"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
+	pb "lsd/gen/lsd/v1"
 )
 
 var nodesBucket = []byte("nodes")

@@ -74,7 +74,7 @@ func parseCPUMax(data string) float64 {
 type cgroupReader struct{ root string }
 
 func newCgroupReader() *cgroupReader {
-	root := os.Getenv("SM_CGROUP_ROOT")
+	root := os.Getenv("LSD_CGROUP_ROOT")
 	if root == "" {
 		root = "/sys/fs/cgroup"
 	}

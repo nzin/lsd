@@ -4,6 +4,6 @@ set -e
 if [ -d /run/systemd/system ]; then
     systemctl daemon-reload || true
 fi
-# The stored metrics (/var/lib/simplemonitor-server) and the 'simplemonitor' user are
+# The stored metrics (/var/lib/lsd-server) and the 'lsd' user are
 # deliberately kept, even on purge. Remove them by hand if you really want to.
 exit 0

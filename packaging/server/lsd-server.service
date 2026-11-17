@@ -1,0 +1,36 @@
+[Unit]
+Description=Linux Simple Diagnostic server (metrics storage, API and web UI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=lsd
+Group=lsd
+# Defaults; override anything in /etc/lsd/server.env (LSD_HTTP_ADDR, LSD_GRPC_ADDR, LSD_RETENTION, LSD_TOKEN, ...)
+Environment=LSD_DATA_DIR=/var/lib/lsd-server
+EnvironmentFile=-/etc/lsd/server.env
+ExecStart=/opt/lsd/server/lsd server
+Restart=on-failure
+RestartSec=5
+LimitNOFILE=65536
+# /var/lib/lsd-server, owned by the service user
+StateDirectory=lsd-server
+StateDirectoryMode=0750
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

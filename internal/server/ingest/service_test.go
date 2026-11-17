@@ -15,9 +15,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/server/store"
-	"simplemonitor/internal/server/topology"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/server/store"
+	"lsd/internal/server/topology"
 )
 
 func setup(t *testing.T, token string) (pb.IngestClient, *store.Store, *topology.Live) {

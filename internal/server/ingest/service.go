@@ -15,9 +15,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/server/store"
-	"simplemonitor/internal/server/topology"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/server/store"
+	"lsd/internal/server/topology"
 )
 
 var nodeIDRe = regexp.MustCompile(`^[A-Za-z0-9._:-]{1,64}$`)

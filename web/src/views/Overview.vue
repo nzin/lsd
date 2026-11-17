@@ -13,7 +13,7 @@ const mountNamer = (l: Record<string, string>) => ({
 
   <div v-if="!nodes.length" class="card muted empty">
     No agents have reported yet. Start one with
-    <code>simplemonitor agent --server &lt;server&gt;:7070</code>.
+    <code>lsd agent --server &lt;server&gt;:7070</code>.
   </div>
 
   <div class="grid-2">

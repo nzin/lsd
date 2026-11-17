@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v7.34.1
-// source: simplemonitor/v1/ingest.proto
+// source: lsd/v1/ingest.proto
 
-package simplemonitorv1
+package lsdv1
 
 import (
 	context "context"
@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Ingest_Register_FullMethodName = "/simplemonitor.v1.Ingest/Register"
-	Ingest_Push_FullMethodName     = "/simplemonitor.v1.Ingest/Push"
+	Ingest_Register_FullMethodName = "/lsd.v1.Ingest/Register"
+	Ingest_Push_FullMethodName     = "/lsd.v1.Ingest/Push"
 )
 
 // IngestClient is the client API for Ingest service.
@@ -142,7 +142,7 @@ type Ingest_PushServer = grpc.ClientStreamingServer[MetricsBatch, PushSummary]
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Ingest_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "simplemonitor.v1.Ingest",
+	ServiceName: "lsd.v1.Ingest",
 	HandlerType: (*IngestServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -157,5 +157,5 @@ var Ingest_ServiceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 	},
-	Metadata: "simplemonitor/v1/ingest.proto",
+	Metadata: "lsd/v1/ingest.proto",
 }

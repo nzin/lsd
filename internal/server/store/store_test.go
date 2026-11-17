@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/server/topology"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/server/topology"
 )
 
 func open(t *testing.T, dir string) *Store {
@@ -40,7 +40,7 @@ func TestAppendAndQueryRange(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	m, err := s.QueryRange(ctx, `sm_cpu_percent{mode="total",node="a"}`, now.Add(-50*time.Second), now, 5*time.Second)
+	m, err := s.QueryRange(ctx, `lsd_cpu_percent{mode="total",node="a"}`, now.Add(-50*time.Second), now, 5*time.Second)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestAppendAndQueryRange(t *testing.T) {
 		t.Fatalf("unexpected result: %v", m)
 	}
 	// memory percentage via vector matching
-	v, err := s.Query(ctx, `100 * sm_mem_bytes{kind="used"} / ignoring(kind) sm_mem_bytes{kind="total"}`, now)
+	v, err := s.Query(ctx, `100 * lsd_mem_bytes{kind="used"} / ignoring(kind) lsd_mem_bytes{kind="total"}`, now)
 	if err != nil || len(v) != 1 || v[0].F != 25 {
 		t.Fatalf("mem pct: %v %v", v, err)
 	}
@@ -69,7 +69,7 @@ func TestOutOfOrderReplay(t *testing.T) {
 	if err := s.AppendBatch(ctx, batch("a", now.Add(-20*time.Minute), 7), nil); err != nil {
 		t.Fatal(err)
 	}
-	m, err := s.QueryRange(ctx, `sm_cpu_percent{mode="total"}`, now.Add(-25*time.Minute), now, time.Minute)
+	m, err := s.QueryRange(ctx, `lsd_cpu_percent{mode="total"}`, now.Add(-25*time.Minute), now, time.Minute)
 	if err != nil || len(m) != 1 {
 		t.Fatalf("%v %v", m, err)
 	}

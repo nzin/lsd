@@ -1,20 +1,20 @@
 [Unit]
-Description=simplemonitor agent (host metrics and eBPF flows)
+Description=Linux Simple Diagnostic agent (host metrics and eBPF flows)
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=simplemonitor
-Group=simplemonitor
-# Defaults; override anything in /etc/simplemonitor/agent.env (SM_SERVER, SM_TOKEN, SM_INTERVAL, ...)
-Environment=SM_STATE_DIR=/var/lib/simplemonitor-agent
-EnvironmentFile=-/etc/simplemonitor/agent.env
-ExecStart=/opt/simplemonitor/agent/simplemonitor agent
+User=lsd
+Group=lsd
+# Defaults; override anything in /etc/lsd/agent.env (LSD_SERVER, LSD_TOKEN, LSD_INTERVAL, ...)
+Environment=LSD_STATE_DIR=/var/lib/lsd-agent
+EnvironmentFile=-/etc/lsd/agent.env
+ExecStart=/opt/lsd/agent/lsd agent
 Restart=always
 RestartSec=5
-# /var/lib/simplemonitor-agent holds the generated node id
-StateDirectory=simplemonitor-agent
+# /var/lib/lsd-agent holds the generated node id
+StateDirectory=lsd-agent
 StateDirectoryMode=0750
 
 # Not root: only the capabilities needed to load and attach the eBPF flow program.

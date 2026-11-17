@@ -16,9 +16,9 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 
-	pb "simplemonitor/gen/simplemonitor/v1"
-	"simplemonitor/internal/agent/flows"
-	"simplemonitor/internal/agent/hostmetrics"
+	pb "lsd/gen/lsd/v1"
+	"lsd/internal/agent/flows"
+	"lsd/internal/agent/hostmetrics"
 )
 
 type Config struct {

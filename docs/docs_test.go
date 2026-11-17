@@ -25,7 +25,7 @@ func TestGuideIsPlainASCII(t *testing.T) {
 
 func TestEmbeddedGuide(t *testing.T) {
 	md, err := Files.ReadFile("install.md")
-	if err != nil || !bytes.Contains(md, []byte("# simplemonitor installation guide")) {
+	if err != nil || !bytes.Contains(md, []byte("# Linux Simple Diagnostic installation guide")) {
 		t.Fatalf("install.md missing or wrong: %v", err)
 	}
 	pdf, err := Files.ReadFile("install.pdf")

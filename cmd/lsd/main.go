@@ -1,7 +1,7 @@
-// simplemonitor: a small host + network monitor. One binary, two roles:
+// lsd (Linux Simple Diagnostic): a small host + network monitor. One binary, two roles:
 //
-//	simplemonitor agent  --server host:7070   # collect + ship metrics (+ eBPF flows)
-//	simplemonitor server                      # ingest, store, API and web UI
+//	lsd agent  --server host:7070   # collect + ship metrics (+ eBPF flows)
+//	lsd server                      # ingest, store, API and web UI
 package main
 
 import (
@@ -18,17 +18,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"simplemonitor/internal/agent"
-	"simplemonitor/internal/loadgen"
-	"simplemonitor/internal/server"
+	"lsd/internal/agent"
+	"lsd/internal/loadgen"
+	"lsd/internal/server"
 )
 
 var version = "dev"
 
-// env returns $SM_<name> or the fallback, so every flag can be set from the
-// environment (SM_SERVER, SM_INTERVAL, ...).
+// env returns $LSD_<name> or the fallback, so every flag can be set from the
+// environment (LSD_SERVER, LSD_INTERVAL, ...).
 func env(name, def string) string {
-	if v, ok := os.LookupEnv("SM_" + name); ok && v != "" {
+	if v, ok := os.LookupEnv("LSD_" + name); ok && v != "" {
 		return v
 	}
 	return def
@@ -68,19 +68,19 @@ func newLogger(level string) *slog.Logger {
 
 func main() {
 	root := &cobra.Command{
-		Use:   "simplemonitor",
-		Short: "Simple host and network monitor (agent + server)",
-		Long: `Simple host and network monitor: one binary, run as an agent on each machine or as the server.
+		Use:   "lsd",
+		Short: "Linux Simple Diagnostic: simple host and network monitor (agent + server)",
+		Long: `Linux Simple Diagnostic (lsd): a simple host and network monitor. One binary, run as an agent on each machine or as the server.
 
 For the installation and configuration guide (PDF), the systemd units and the example
 configuration files, use the get-documentation command. For example:
 
-  simplemonitor get-documentation --directory ./sm-docs`,
+  lsd get-documentation --directory ./lsd-docs`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 	var logLevel string
-	root.PersistentFlags().StringVar(&logLevel, "log-level", env("LOG_LEVEL", "info"), "debug|info|warn|error [SM_LOG_LEVEL]")
+	root.PersistentFlags().StringVar(&logLevel, "log-level", env("LOG_LEVEL", "info"), "debug|info|warn|error [LSD_LOG_LEVEL]")
 	root.AddCommand(agentCmd(&logLevel), serverCmd(&logLevel), loadgenCmd(&logLevel), getDocumentationCmd(), healthcheckCmd(), &cobra.Command{
 		Use: "version", Run: func(*cobra.Command, []string) { fmt.Println(version) },
 	})
@@ -111,17 +111,17 @@ func agentCmd(logLevel *string) *cobra.Command {
 		},
 	}
 	f := c.Flags()
-	f.StringVar(&cfg.Server, "server", env("SERVER", "localhost:7070"), "server gRPC address [SM_SERVER]")
-	f.StringVar(&cfg.NodeID, "node-id", env("NODE_ID", ""), "stable node id; default: persisted UUID [SM_NODE_ID]")
-	f.StringVar(&cfg.Hostname, "hostname", env("HOSTNAME_OVERRIDE", ""), "display name; default: OS hostname [SM_HOSTNAME_OVERRIDE]")
-	f.StringVar(&cfg.StateDir, "state-dir", env("STATE_DIR", "/var/lib/simplemonitor"), "where the generated node id is stored [SM_STATE_DIR]")
-	f.DurationVar(&cfg.Interval, "interval", envDur("INTERVAL", 5*time.Second), "collection interval [SM_INTERVAL]")
-	f.StringVar(&cfg.MetricsScope, "metrics-scope", env("METRICS_SCOPE", "host"), "host|cgroup: cgroup reports this container's own CPU/mem/IO [SM_METRICS_SCOPE]")
-	f.StringVar(&cfg.Token, "token", env("TOKEN", ""), "shared secret sent as bearer token [SM_TOKEN]")
-	f.BoolVar(&cfg.TLS, "tls", envBool("TLS", false), "use TLS to talk to the server [SM_TLS]")
-	f.BoolVar(&cfg.TLSSkipVerify, "tls-skip-verify", envBool("TLS_SKIP_VERIFY", false), "skip server certificate verification [SM_TLS_SKIP_VERIFY]")
-	f.BoolVar(&cfg.DisableFlows, "no-flows", envBool("NO_FLOWS", false), "disable eBPF flow capture [SM_NO_FLOWS]")
-	f.StringVar(&ifaces, "flow-ifaces", env("FLOW_IFACES", ""), "comma-separated interface globs for flow capture; default: all physical [SM_FLOW_IFACES]")
+	f.StringVar(&cfg.Server, "server", env("SERVER", "localhost:7070"), "server gRPC address [LSD_SERVER]")
+	f.StringVar(&cfg.NodeID, "node-id", env("NODE_ID", ""), "stable node id; default: persisted UUID [LSD_NODE_ID]")
+	f.StringVar(&cfg.Hostname, "hostname", env("HOSTNAME_OVERRIDE", ""), "display name; default: OS hostname [LSD_HOSTNAME_OVERRIDE]")
+	f.StringVar(&cfg.StateDir, "state-dir", env("STATE_DIR", "/var/lib/lsd"), "where the generated node id is stored [LSD_STATE_DIR]")
+	f.DurationVar(&cfg.Interval, "interval", envDur("INTERVAL", 5*time.Second), "collection interval [LSD_INTERVAL]")
+	f.StringVar(&cfg.MetricsScope, "metrics-scope", env("METRICS_SCOPE", "host"), "host|cgroup: cgroup reports this container's own CPU/mem/IO [LSD_METRICS_SCOPE]")
+	f.StringVar(&cfg.Token, "token", env("TOKEN", ""), "shared secret sent as bearer token [LSD_TOKEN]")
+	f.BoolVar(&cfg.TLS, "tls", envBool("TLS", false), "use TLS to talk to the server [LSD_TLS]")
+	f.BoolVar(&cfg.TLSSkipVerify, "tls-skip-verify", envBool("TLS_SKIP_VERIFY", false), "skip server certificate verification [LSD_TLS_SKIP_VERIFY]")
+	f.BoolVar(&cfg.DisableFlows, "no-flows", envBool("NO_FLOWS", false), "disable eBPF flow capture [LSD_NO_FLOWS]")
+	f.StringVar(&ifaces, "flow-ifaces", env("FLOW_IFACES", ""), "comma-separated interface globs for flow capture; default: all physical [LSD_FLOW_IFACES]")
 	f.IntVar(&cfg.BufferBatches, "buffer", 720, "batches buffered while the server is unreachable")
 	return c
 }
@@ -138,14 +138,14 @@ func serverCmd(logLevel *string) *cobra.Command {
 		},
 	}
 	f := c.Flags()
-	f.StringVar(&cfg.GRPCAddr, "grpc", env("GRPC_ADDR", ":7070"), "gRPC listen address [SM_GRPC_ADDR]")
-	f.StringVar(&cfg.HTTPAddr, "http", env("HTTP_ADDR", ":8080"), "HTTP listen address (UI + API) [SM_HTTP_ADDR]")
-	f.StringVar(&cfg.DataDir, "data-dir", env("DATA_DIR", "./data"), "storage directory [SM_DATA_DIR]")
-	f.DurationVar(&cfg.Retention, "retention", envDur("RETENTION", 30*24*time.Hour), "how long to keep metrics [SM_RETENTION]")
-	f.StringVar(&cfg.Token, "token", env("TOKEN", ""), "require this bearer token from agents [SM_TOKEN]")
+	f.StringVar(&cfg.GRPCAddr, "grpc", env("GRPC_ADDR", ":7070"), "gRPC listen address [LSD_GRPC_ADDR]")
+	f.StringVar(&cfg.HTTPAddr, "http", env("HTTP_ADDR", ":8080"), "HTTP listen address (UI + API) [LSD_HTTP_ADDR]")
+	f.StringVar(&cfg.DataDir, "data-dir", env("DATA_DIR", "./data"), "storage directory [LSD_DATA_DIR]")
+	f.DurationVar(&cfg.Retention, "retention", envDur("RETENTION", 30*24*time.Hour), "how long to keep metrics [LSD_RETENTION]")
+	f.StringVar(&cfg.Token, "token", env("TOKEN", ""), "require this bearer token from agents [LSD_TOKEN]")
 	f.IntVar(&cfg.TopN, "external-top-n", 50, "max distinct external endpoints per batch; the rest are grouped")
-	f.StringVar(&cfg.TLSCert, "tls-cert", env("TLS_CERT", ""), "gRPC TLS certificate [SM_TLS_CERT]")
-	f.StringVar(&cfg.TLSKey, "tls-key", env("TLS_KEY", ""), "gRPC TLS key [SM_TLS_KEY]")
+	f.StringVar(&cfg.TLSCert, "tls-cert", env("TLS_CERT", ""), "gRPC TLS certificate [LSD_TLS_CERT]")
+	f.StringVar(&cfg.TLSKey, "tls-key", env("TLS_KEY", ""), "gRPC TLS key [LSD_TLS_KEY]")
 	return c
 }
 
