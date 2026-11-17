@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { edgeWidth, escapeHtml, formatBytes, formatPct, formatRate, MAX_EDGE_PX, MIN_EDGE_PX } from './format'
+import { edgeWidth, escapeHtml, formatBytes, formatPct, formatRate, formatUnit, MAX_EDGE_PX, MIN_EDGE_PX } from './format'
 
 describe('edgeWidth', () => {
   it('is bounded by the min/max pixel width', () => {
@@ -29,6 +29,11 @@ describe('formatters', () => {
   it('formats percentages', () => {
     expect(formatPct(5.234)).toBe('5.2%')
     expect(formatPct(42.7)).toBe('43%')
+  })
+  it('formats IOPS', () => {
+    expect(formatUnit(0, 'iops')).toBe('0 IOPS')
+    expect(formatUnit(42, 'iops')).toBe('42 IOPS')
+    expect(formatUnit(12500, 'iops')).toBe('13K IOPS')
   })
   it('escapes html in labels', () => {
     expect(escapeHtml('<img src=x onerror=1>&"')).toBe('&lt;img src=x onerror=1&gt;&amp;&quot;')

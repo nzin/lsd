@@ -32,6 +32,7 @@ func newAPI(t *testing.T) (*API, *store.Store) {
 			NodeId: "a", TsUnixMs: ts.UnixMilli(), IntervalMs: 5000,
 			Host:   &pb.HostSample{CpuTotalPct: 42, MemTotal: 1000, MemUsed: 500, SwapTotal: 2000, SwapUsed: 500},
 			Netifs: []*pb.NetIfSample{{Iface: "eth0", RxBps: 100, TxBps: 200}},
+			Disks:  []*pb.DiskSample{{Mount: "/", Total: 100, Used: 40, ReadIops: 30, WriteIops: 12}},
 		}, nil)
 		if err != nil {
 			t.Fatal(err)
@@ -98,6 +99,32 @@ func TestSwapAndAgentsMetrics(t *testing.T) {
 	}
 	if v := lastValue(t, a, "/api/metrics?metric=agents&node=all&range=5m"); v != 1 {
 		t.Fatalf("agents = %v, want 1", v)
+	}
+}
+
+func TestDiskIOPS(t *testing.T) {
+	a, _ := newAPI(t)
+	// all nodes: one total line per node (read + write)
+	if v := lastValue(t, a, "/api/metrics?metric=disk_iops&node=all&range=5m"); v != 42 {
+		t.Fatalf("total iops = %v, want 42", v)
+	}
+	// single node: read and write per filesystem
+	code, body := get(t, a, "/api/metrics?metric=disk_iops&node=a&range=5m")
+	var r struct {
+		Series []struct {
+			Labels map[string]string
+			Points [][2]float64
+		}
+	}
+	if code != 200 || json.Unmarshal(body, &r) != nil || len(r.Series) != 2 {
+		t.Fatalf("per-op series: %d %s", code, body)
+	}
+	got := map[string]float64{}
+	for _, s := range r.Series {
+		got[s.Labels["mount"]+" "+s.Labels["op"]] = s.Points[len(s.Points)-1][1]
+	}
+	if got["/ read"] != 30 || got["/ write"] != 12 {
+		t.Fatalf("per-op values: %v", got)
 	}
 }
 

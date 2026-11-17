@@ -56,6 +56,7 @@ const ifaceNamer = (l: Record<string, string>) => ({
     <div class="grid-2">
       <MetricChart title="Disk usage" :node="id" metric="disk_pct" unit="percent" :y-max="100" :namer="mountNamer" />
       <MetricChart title="Disk I/O" subtitle="throughput per filesystem" :node="id" metric="disk_io" unit="bps" :namer="ioNamer" />
+      <MetricChart title="Disk IOPS" subtitle="operations per second per filesystem" :node="id" metric="disk_iops" unit="iops" :namer="ioNamer" />
     </div>
 
     <h2 class="section-title">Network</h2>

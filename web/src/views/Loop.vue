@@ -11,6 +11,7 @@ const slides = [
   { key: 'cpu', title: 'CPU usage', sub: 'all nodes' },
   { key: 'mem', title: 'Memory usage', sub: 'all nodes' },
   { key: 'disk', title: 'Disk usage', sub: 'all nodes, per filesystem' },
+  { key: 'iops', title: 'Disk IOPS', sub: 'read + write operations per second, all nodes' },
   { key: 'swap', title: 'Swap usage', sub: 'all nodes' },
   { key: 'load', title: 'Load average', sub: '1 minute, all nodes' },
   { key: 'topology', title: 'Live topology', sub: 'host-to-host traffic, last 30 s' },
@@ -90,6 +91,7 @@ const current = computed(() => slides[index.value])
   <MetricChart v-show="current.key === 'cpu'" bare title="CPU usage" metric="cpu" node="all" unit="percent" :y-max="100" :height="chartH" />
   <MetricChart v-show="current.key === 'mem'" bare title="Memory usage" metric="mem_pct" node="all" unit="percent" :y-max="100" :height="chartH" />
   <MetricChart v-show="current.key === 'disk'" bare title="Disk usage" metric="disk_pct" node="all" unit="percent" :y-max="100" :height="chartH" :namer="mountNamer" />
+  <MetricChart v-show="current.key === 'iops'" bare title="Disk IOPS" metric="disk_iops" node="all" unit="iops" :height="chartH" />
   <MetricChart v-show="current.key === 'swap'" bare title="Swap usage" metric="swap_pct" node="all" unit="percent" :y-max="100" :height="chartH" />
   <MetricChart v-show="current.key === 'load'" bare title="Load average" metric="load" node="all" unit="number" :height="chartH"
     :filter="l => l.period === '1'" />

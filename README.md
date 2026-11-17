@@ -24,7 +24,7 @@ open http://localhost:8080
 Two small traffic generators run inside the agents' network namespaces so the topology has something to show:
 **agent-1 → agent-2** carries ~4 MB/s on a slow sine wave (thick edge), **agent-2 → agent-1** ~400 KB/s steady (thin edge), plus thin edges to/from the server.
 
-Pages: **Metrics** (a *Nodes* dropdown switches between all nodes and a single node's detail), **Topology** (Live with a 10 s – 5 min window, or History over the selected range), **In loop** (a wall-display mode that rotates through connected agents, CPU, memory, disk, swap, load average and the live topology, 5 seconds each; ← / → to switch, space to pause). Every chart has a *Table* view; the topology has a *Connections* table.
+Pages: **Metrics** (a *Nodes* dropdown switches between all nodes and a single node's detail), **Topology** (Live with a 10 s – 5 min window, or History over the selected range), **In loop** (a wall-display mode that rotates through connected agents, CPU, memory, disk usage, disk IOPS, swap, load average and the live topology, 5 seconds each; ← / → to switch, space to pause). Every chart has a *Table* view; the topology has a *Connections* table.
 
 ```bash
 docker compose -f deploy/docker-compose.yml down        # stop (add -v to drop stored metrics)
@@ -114,7 +114,7 @@ Removing a package stops and disables its service; the env file survives until `
 | Endpoint | |
 |---|---|
 | `GET /api/nodes` | nodes, online state, latest values |
-| `GET /api/metrics?metric=&node=all\|<id>&range=1h` | chart series (`cpu`, `cpu_modes`, `load`, `mem_pct`, `mem_bytes`, `swap_pct`, `disk_pct`, `disk_io`, `net_bps`, `net_pps`, `agents`) |
+| `GET /api/metrics?metric=&node=all\|<id>&range=1h` | chart series (`cpu`, `cpu_modes`, `load`, `mem_pct`, `mem_bytes`, `swap_pct`, `disk_pct`, `disk_io`, `disk_iops`, `net_bps`, `net_pps`, `agents`) |
 | `GET /api/topology?window=30s` or `?range=24h` | live or historical graph |
 | `GET /api/live` | Server-Sent Events: topology + nodes every 2 s |
 | `GET /api/v1/query_range`, `/api/v1/query` | Prometheus-compatible, so Grafana can use the server as a Prometheus data source |

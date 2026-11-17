@@ -196,6 +196,14 @@ var metricDefs = map[string]metricDef{
 		}
 		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_disk_io_bps{%s}[%s]))`, by, nm, w)
 	}},
+	// Disk operations per second. All nodes: one total (read+write) line per node; single node: per filesystem and op.
+	"disk_iops": {func(nm, w string, single bool) string {
+		by := "node"
+		if single {
+			by = "node,mount,op"
+		}
+		return fmt.Sprintf(`sum by (%s)(avg_over_time(sm_disk_iops{%s}[%s]))`, by, nm, w)
+	}},
 	"net_bps": {func(nm, w string, single bool) string {
 		by := "node,dir"
 		if single {

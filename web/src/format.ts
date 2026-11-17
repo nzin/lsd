@@ -26,7 +26,7 @@ export function formatNumber(v: number): string {
   return v.toFixed(2).replace(/\.?0+$/, '') || '0'
 }
 
-export type Unit = 'percent' | 'bytes' | 'bps' | 'pps' | 'number'
+export type Unit = 'percent' | 'bytes' | 'bps' | 'pps' | 'iops' | 'number'
 
 export function formatUnit(v: number, unit: Unit): string {
   switch (unit) {
@@ -34,6 +34,7 @@ export function formatUnit(v: number, unit: Unit): string {
     case 'bytes': return formatBytes(v)
     case 'bps': return formatRate(v)
     case 'pps': return formatNumber(v) + ' pkt/s'
+    case 'iops': return formatNumber(v) + ' IOPS'
     default: return formatNumber(v)
   }
 }
