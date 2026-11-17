@@ -24,7 +24,7 @@ open http://localhost:8080
 Two small traffic generators run inside the agents' network namespaces so the topology has something to show:
 **agent-1 → agent-2** carries ~4 MB/s on a slow sine wave (thick edge), **agent-2 → agent-1** ~400 KB/s steady (thin edge), plus thin edges to/from the server.
 
-Pages: **Metrics** (overview of all nodes, click a node for its detail), **Topology** (Live with a 10 s – 5 min window, or History over the selected range). Every chart has a *Table* view; the topology has a *Connections* table.
+Pages: **Metrics** (a *Nodes* dropdown switches between all nodes and a single node's detail), **Topology** (Live with a 10 s – 5 min window, or History over the selected range). Every chart has a *Table* view; the topology has a *Connections* table.
 
 ```bash
 docker compose -f deploy/docker-compose.yml down        # stop (add -v to drop stored metrics)

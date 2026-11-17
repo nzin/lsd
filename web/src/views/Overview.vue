@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MetricChart from '../components/MetricChart.vue'
-import NodeCard from '../components/NodeCard.vue'
+import NodesHeader from '../components/NodesHeader.vue'
 import { nodeName, nodeSlot, nodes } from '../store'
 
 const mountNamer = (l: Record<string, string>) => ({
@@ -9,16 +9,13 @@ const mountNamer = (l: Record<string, string>) => ({
 </script>
 
 <template>
-  <h2 class="section-title first">Nodes</h2>
-  <div v-if="nodes.length" class="tiles">
-    <NodeCard v-for="n in nodes" :key="n.id" :node="n" />
-  </div>
-  <div v-else class="card muted">
+  <NodesHeader />
+
+  <div v-if="!nodes.length" class="card muted empty">
     No agents have reported yet. Start one with
     <code>simplemonitor agent --server &lt;server&gt;:7070</code>.
   </div>
 
-  <h2 class="section-title">All nodes</h2>
   <div class="grid-2">
     <MetricChart title="CPU usage" metric="cpu" node="all" unit="percent" :y-max="100" />
     <MetricChart title="Memory usage" metric="mem_pct" node="all" unit="percent" :y-max="100" />
@@ -31,7 +28,6 @@ const mountNamer = (l: Record<string, string>) => ({
 </template>
 
 <style scoped>
-.first { margin-top: 4px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.empty { margin-bottom: 16px; }
 code { background: var(--hover); padding: 1px 6px; border-radius: 4px; }
 </style>

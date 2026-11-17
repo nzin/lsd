@@ -1,18 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { autoRefresh, nodes, nodesError, range, RANGES, refreshTick, setAutoRefresh, setRange, startPolling } from './store'
 import { applyTheme, themeChoice, type ThemeChoice } from './theme'
 
 startPolling()
 const route = useRoute()
-const router = useRouter()
 
-const selectedNode = computed(() => (route.path.startsWith('/nodes/') ? String(route.params.id) : 'all'))
-function onNode(e: Event) {
-  const v = (e.target as HTMLSelectElement).value
-  router.push(v === 'all' ? '/' : `/nodes/${encodeURIComponent(v)}`)
-}
 const online = computed(() => nodes.value.filter(n => n.online).length)
 const themes: ThemeChoice[] = ['auto', 'light', 'dark']
 function nextTheme() { applyTheme(themes[(themes.indexOf(themeChoice.value) + 1) % themes.length]) }
@@ -42,12 +36,6 @@ function nextTheme() { applyTheme(themes[(themes.indexOf(themeChoice.value) + 1)
       <div class="seg" role="group" aria-label="Time range">
         <button v-for="r in RANGES" :key="r.key" class="btn" :aria-pressed="range === r.key" @click="setRange(r.key)">{{ r.label }}</button>
       </div>
-      <label class="field">Node
-        <select :value="selectedNode" @change="onNode">
-          <option value="all">All nodes</option>
-          <option v-for="n in nodes" :key="n.id" :value="n.id">{{ n.hostname }}</option>
-        </select>
-      </label>
       <span class="grow"></span>
       <label class="field"><input type="checkbox" :checked="autoRefresh" @change="setAutoRefresh(($event.target as HTMLInputElement).checked)" /> Auto-refresh</label>
       <button class="btn" @click="refreshTick++">Refresh</button>
@@ -70,5 +58,4 @@ nav a.active { color: var(--text-primary); background: var(--hover); font-weight
 .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px 0; }
 .seg { display: flex; flex-wrap: wrap; gap: 4px; }
 .field { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
-select { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px; }
 </style>

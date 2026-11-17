@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import MetricChart from '../components/MetricChart.vue'
+import NodesHeader from '../components/NodesHeader.vue'
 import { formatTime } from '../format'
 import { nodes } from '../store'
 
@@ -21,6 +22,7 @@ const ifaceNamer = (l: Record<string, string>) => ({
 </script>
 
 <template>
+  <NodesHeader />
   <div v-if="!node" class="card muted">Unknown node “{{ id }}”. <router-link to="/">Back to overview</router-link></div>
   <template v-else>
     <div class="card info">
