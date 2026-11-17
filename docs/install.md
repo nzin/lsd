@@ -363,7 +363,10 @@ A node is shown as offline when it has not reported for three intervals (at leas
 - **Disk usage and IOPS.** Local filesystems only: ext2/3/4, xfs, btrfs, zfs,
   f2fs, jfs, reiserfs, vfat, exfat, ntfs and virtiofs, plus the root filesystem of
   a container. Network filesystems (NFS, CIFS) are left out on purpose, because
-  reading their size can hang when the server is unreachable.
+  reading their size can hang when the server is unreachable. On a Mac (for
+  development only) APFS, HFS+ and FAT volumes are reported, but not the system
+  volumes: the data volume, `/System/Volumes/Data`, stands for the internal disk.
+  Disk IOPS are not available on macOS and stay at zero.
 - **Load average.** Always for the whole machine, even in a container.
 - **Topology.** Each arrow is the traffic from one host to another, and its width
   follows the volume (from 1 pixel for 1 KB/s or less to 24 pixels for about

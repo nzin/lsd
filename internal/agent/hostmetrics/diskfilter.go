@@ -12,12 +12,16 @@ var diskFS = map[string]bool{
 	"jfs": true, "reiserfs": true, "vfat": true, "exfat": true, "ntfs": true, "ntfs3": true,
 	"fuseblk":  true, // ntfs-3g and friends
 	"virtiofs": true, // host shares inside VMs (e.g. Docker Desktop)
+	// macOS (development machines): APFS, HFS+, FAT. Network filesystems (smbfs, nfs, afpfs) stay out.
+	"apfs": true, "hfs": true, "msdos": true,
 }
 
 // Mount points that are container / runtime plumbing rather than data disks.
 var skipMountPrefixes = []string{
 	"/proc", "/sys", "/dev", "/run",
 	"/var/lib/docker/", "/var/lib/containers/", "/var/lib/kubelet/", "/snap/",
+	// macOS: the recovery volume, and the Time Machine local snapshots mounted under /Volumes
+	"/Volumes/Recovery", "/Volumes/.timemachine", "/Volumes/com.apple.TimeMachine.localsnapshots",
 }
 
 // wantDisk decides whether a mount should be reported. isDir is whether the mount point is a directory
@@ -29,6 +33,18 @@ func wantDisk(fstype, mountpoint string, isDir bool) bool {
 		return mountpoint == "/"
 	}
 	if !diskFS[fstype] || !isDir {
+		return false
+	}
+	// macOS (APFS, since Catalina): "/" is the sealed, read-only system volume (a few GB, misleading) and the
+	// user's data lives in /System/Volumes/Data, which is the one whose fill level matters. The other volumes
+	// below /System/Volumes (VM, Preboot, Update, ...) are system plumbing.
+	if fstype == "apfs" && mountpoint == "/" {
+		return false
+	}
+	if mountpoint == "/System/Volumes/Data" {
+		return true
+	}
+	if strings.HasPrefix(mountpoint, "/System/Volumes/") {
 		return false
 	}
 	for _, p := range skipMountPrefixes {
