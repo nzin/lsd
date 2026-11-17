@@ -6,6 +6,8 @@ import { edgeWidth, formatRate, formatNumber } from '../format'
 import { nodes, nodeSlot, rangeSec, refreshTick, setNodes } from '../store'
 import { cssVar, seriesColor, themeVersion } from '../theme'
 
+const props = defineProps<{ compact?: boolean }>() // compact: just the live graph + legend (used by the loop page)
+
 type Mode = 'live' | 'history'
 const mode = ref<Mode>('live')
 const windowSec = ref(30)
@@ -190,7 +192,7 @@ function fit() { cy?.fit(undefined, 70) }
 </script>
 
 <template>
-  <div class="bar">
+  <div v-if="!compact" class="bar">
     <div class="seg" role="group" aria-label="Mode">
       <button class="btn" :aria-pressed="mode === 'live'" @click="mode = 'live'">Live</button>
       <button class="btn" :aria-pressed="mode === 'history'" @click="mode = 'history'">History</button>
@@ -207,7 +209,7 @@ function fit() { cy?.fit(undefined, 70) }
     <span class="muted note">{{ modeNote }}<template v-if="mode === 'history'"> · uses the range selected above</template></span>
   </div>
 
-  <div class="card stage">
+  <div class="card stage" :class="{ compact }">
     <div ref="box" class="graph" role="img" aria-label="Network topology graph; the same data is in the table below"></div>
     <div v-if="tip" class="tip" :style="{ left: tip.x + 14 + 'px', top: tip.y + 14 + 'px' }">
       <strong>{{ tip.title }}</strong>
@@ -239,8 +241,8 @@ function fit() { cy?.fit(undefined, 70) }
     </div>
   </div>
 
-  <h2 class="section-title">Connections</h2>
-  <div class="card tbl">
+  <h2 v-if="!compact" class="section-title">Connections</h2>
+  <div v-if="!compact" class="card tbl">
     <table class="num">
       <thead><tr><th>From</th><th>To</th><th class="r">Rate</th><th class="r">Packets/s</th><th>Protocols</th><th class="bar-col" aria-hidden="true"></th></tr></thead>
       <tbody>
@@ -268,6 +270,7 @@ select { background: var(--surface-1); border: 1px solid var(--border); border-r
 .note { font-size: 12px; }
 .stage { position: relative; padding: 0; overflow: hidden; }
 .graph { height: min(62vh, 620px); min-height: 380px; width: 100%; }
+.compact .graph { height: max(380px, calc(100vh - 340px)); }
 .tip { position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 14px rgb(0 0 0 / 15%); z-index: 5; max-width: 260px; }
 .tip strong { display: block; margin-bottom: 2px; }

@@ -48,6 +48,8 @@ const ifaceNamer = (l: Record<string, string>) => ({
       <MetricChart title="Memory" subtitle="used, page cache, swap" :node="id" metric="mem_bytes" unit="bytes" :namer="memNamer" />
       <MetricChart title="Memory usage" :node="id" metric="mem_pct" unit="percent" :y-max="100" area
         :namer="() => ({ key: 'mem', name: 'Memory used', slot: 0 })" />
+      <MetricChart title="Swap usage" subtitle="used / total swap" :node="id" metric="swap_pct" unit="percent" :y-max="100" area
+        :namer="() => ({ key: 'swap', name: 'Swap used', slot: 1 })" />
     </div>
 
     <h2 class="section-title">Disk</h2>

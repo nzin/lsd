@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    if ! getent passwd simplemonitor >/dev/null 2>&1; then
+        adduser --system --group --no-create-home --home /opt/simplemonitor \
+            --shell /usr/sbin/nologin --gecos "simplemonitor" simplemonitor
+    fi
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload || true
+        systemctl enable simplemonitor-server.service >/dev/null 2>&1 || true
+        # also on upgrade: run the new binary
+        systemctl restart simplemonitor-server.service \
+            || echo "simplemonitor-server: could not start the service, see 'systemctl status simplemonitor-server'" >&2
+    fi
+fi
+exit 0

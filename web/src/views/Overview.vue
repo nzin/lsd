@@ -20,6 +20,7 @@ const mountNamer = (l: Record<string, string>) => ({
     <MetricChart title="CPU usage" metric="cpu" node="all" unit="percent" :y-max="100" />
     <MetricChart title="Memory usage" metric="mem_pct" node="all" unit="percent" :y-max="100" />
     <MetricChart title="Disk usage" subtitle="used / total per filesystem" metric="disk_pct" node="all" unit="percent" :y-max="100" :namer="mountNamer" />
+    <MetricChart title="Swap usage" subtitle="used / total swap" metric="swap_pct" node="all" unit="percent" :y-max="100" />
     <MetricChart title="Load average (1 min)" metric="load" node="all" unit="number"
       :filter="l => l.period === '1'" />
     <MetricChart title="Network receive" metric="net_bps" node="all" unit="bps" :filter="l => l.dir === 'rx'" />

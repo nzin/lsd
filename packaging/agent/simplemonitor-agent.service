@@ -1,0 +1,37 @@
+[Unit]
+Description=simplemonitor agent (host metrics and eBPF flows)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=simplemonitor
+Group=simplemonitor
+# Defaults; override anything in /etc/simplemonitor/agent.env (SM_SERVER, SM_TOKEN, SM_INTERVAL, ...)
+Environment=SM_STATE_DIR=/var/lib/simplemonitor-agent
+EnvironmentFile=-/etc/simplemonitor/agent.env
+ExecStart=/opt/simplemonitor/agent/simplemonitor agent
+Restart=always
+RestartSec=5
+# /var/lib/simplemonitor-agent holds the generated node id
+StateDirectory=simplemonitor-agent
+StateDirectoryMode=0750
+
+# Not root: only the capabilities needed to load and attach the eBPF flow program.
+AmbientCapabilities=CAP_BPF CAP_NET_ADMIN CAP_PERFMON CAP_SYS_RESOURCE
+CapabilityBoundingSet=CAP_BPF CAP_NET_ADMIN CAP_PERFMON CAP_SYS_RESOURCE
+LimitMEMLOCK=infinity
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelModules=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

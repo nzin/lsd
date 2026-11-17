@@ -1,0 +1,14 @@
+Package: simplemonitor-server
+Version: @VERSION@
+Architecture: @ARCH@
+Maintainer: simplemonitor <root@localhost>
+Installed-Size: @SIZE@
+Depends: adduser
+Recommends: systemd
+Suggests: simplemonitor-agent
+Section: admin
+Priority: optional
+Description: simplemonitor server (metrics storage, API and web UI)
+ Receives metrics from simplemonitor agents over gRPC, stores them in an
+ embedded time-series database and serves the web UI and API on port 8080.
+ Installed in /opt/simplemonitor/server and run as a systemd service.

@@ -2,6 +2,7 @@ package hostmetrics
 
 import (
 	"fmt"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -123,14 +124,8 @@ func (c *Collector) Collect(now time.Time) (*pb.HostSample, []*pb.DiskSample, []
 	return host, disks, netifs, nil
 }
 
-var skipFS = map[string]bool{
-	"tmpfs": true, "devtmpfs": true, "overlay": true, "squashfs": true, "proc": true,
-	"sysfs": true, "cgroup": true, "cgroup2": true, "devpts": true, "mqueue": true,
-	"nsfs": true, "autofs": true, "fuse.lxcfs": true, "fuse.gvfsd-fuse": true,
-}
-
 func (c *Collector) collectDisks(elapsed float64, first bool, cgR, cgW, cgRI, cgWI float64) []*pb.DiskSample {
-	parts, err := disk.Partitions(false)
+	parts, err := disk.Partitions(true) // all=false finds nothing inside containers; wantDisk filters
 	if err != nil {
 		return nil
 	}
@@ -138,8 +133,8 @@ func (c *Collector) collectDisks(elapsed float64, first bool, cgR, cgW, cgRI, cg
 	var out []*pb.DiskSample
 	seen := map[string]bool{}
 	for _, p := range parts {
-		if skipFS[p.Fstype] || strings.HasPrefix(p.Mountpoint, "/proc") || strings.HasPrefix(p.Mountpoint, "/sys") ||
-			strings.HasPrefix(p.Mountpoint, "/dev") || strings.HasPrefix(p.Mountpoint, "/run") {
+		fi, statErr := os.Stat(p.Mountpoint)
+		if !wantDisk(p.Fstype, p.Mountpoint, statErr == nil && fi.IsDir()) {
 			continue
 		}
 		if seen[p.Device] { // bind mounts of the same device

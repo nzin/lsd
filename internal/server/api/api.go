@@ -178,6 +178,14 @@ var metricDefs = map[string]metricDef{
 	"mem_bytes": {func(nm, w string, _ bool) string {
 		return fmt.Sprintf(`avg_over_time(sm_mem_bytes{kind=~"used|cached|swap_used",%s}[%s])`, nm, w)
 	}},
+	// Swap used / total. clamp_min avoids 0/0 on machines without swap (they show 0%, not "no data").
+	"swap_pct": {func(nm, w string, _ bool) string {
+		return fmt.Sprintf(`100 * avg_over_time(sm_mem_bytes{kind="swap_used",%s}[%s]) / ignoring(kind) clamp_min(avg_over_time(sm_mem_bytes{kind="swap_total",%s}[%s]), 1)`, nm, w, nm, w)
+	}},
+	// Number of agents that pushed within the window (a single unlabeled series).
+	"agents": {func(nm, w string, _ bool) string {
+		return fmt.Sprintf(`count(count_over_time(sm_node_up{%s}[%s]))`, nm, w)
+	}},
 	"disk_pct": {func(nm, w string, _ bool) string {
 		return fmt.Sprintf(`100 * avg_over_time(sm_disk_bytes{kind="used",%s}[%s]) / ignoring(kind) avg_over_time(sm_disk_bytes{kind="total",%s}[%s])`, nm, w, nm, w)
 	}},

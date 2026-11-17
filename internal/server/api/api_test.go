@@ -30,7 +30,7 @@ func newAPI(t *testing.T) (*API, *store.Store) {
 		ts := now.Add(-time.Duration(i) * 5 * time.Second)
 		err := st.AppendBatch(t.Context(), &pb.MetricsBatch{
 			NodeId: "a", TsUnixMs: ts.UnixMilli(), IntervalMs: 5000,
-			Host:   &pb.HostSample{CpuTotalPct: 42, MemTotal: 1000, MemUsed: 500},
+			Host:   &pb.HostSample{CpuTotalPct: 42, MemTotal: 1000, MemUsed: 500, SwapTotal: 2000, SwapUsed: 500},
 			Netifs: []*pb.NetIfSample{{Iface: "eth0", RxBps: 100, TxBps: 200}},
 		}, nil)
 		if err != nil {
@@ -75,6 +75,41 @@ func TestMetricsEndpoint(t *testing.T) {
 	code, body = get(t, a, "/api/metrics?metric=mem_pct&node=all&range=5m")
 	if code != 200 || !json.Valid(body) {
 		t.Fatalf("mem_pct: %d %s", code, body)
+	}
+}
+
+func lastValue(t *testing.T, a *API, url string) float64 {
+	t.Helper()
+	code, body := get(t, a, url)
+	var r struct {
+		Series []struct{ Points [][2]float64 }
+	}
+	if code != 200 || json.Unmarshal(body, &r) != nil || len(r.Series) != 1 || len(r.Series[0].Points) == 0 {
+		t.Fatalf("%s: %d %s", url, code, body)
+	}
+	p := r.Series[0].Points
+	return p[len(p)-1][1]
+}
+
+func TestSwapAndAgentsMetrics(t *testing.T) {
+	a, _ := newAPI(t)
+	if v := lastValue(t, a, "/api/metrics?metric=swap_pct&node=all&range=5m"); v != 25 { // 500 / 2000
+		t.Fatalf("swap_pct = %v, want 25", v)
+	}
+	if v := lastValue(t, a, "/api/metrics?metric=agents&node=all&range=5m"); v != 1 {
+		t.Fatalf("agents = %v, want 1", v)
+	}
+}
+
+func TestSwapPctWithoutSwapIsZeroNotMissing(t *testing.T) {
+	a, st := newAPI(t)
+	now := time.Now()
+	if err := st.AppendBatch(t.Context(), &pb.MetricsBatch{NodeId: "noswap", TsUnixMs: now.UnixMilli(), IntervalMs: 5000,
+		Host: &pb.HostSample{MemTotal: 1000, MemUsed: 1}}, nil); err != nil {
+		t.Fatal(err)
+	}
+	if v := lastValue(t, a, "/api/metrics?metric=swap_pct&node=noswap&range=5m"); v != 0 {
+		t.Fatalf("swap_pct without swap = %v, want 0", v)
 	}
 }
 

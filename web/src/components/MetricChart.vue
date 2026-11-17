@@ -23,6 +23,8 @@ const props = withDefaults(defineProps<{
   yMax?: number
   area?: boolean
   stacked?: boolean
+  integer?: boolean                  // whole-number y axis (counts)
+  bare?: boolean                     // hide the card header (the page supplies the title)
   height?: number
   filter?: (labels: Record<string, string>) => boolean
   namer?: (labels: Record<string, string>) => Naming
@@ -116,7 +118,9 @@ const option = computed<any>(() => {
     yAxis: {
       type: 'value',
       min: 0,
-      max: props.yMax,
+      // count charts get one unit of headroom so a flat line is not glued to the top edge
+      max: props.yMax ?? (props.integer ? (v: { max: number }) => Math.max(v.max, 1) + 1 : undefined),
+      minInterval: props.integer ? 1 : undefined,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { color: muted, formatter: (v: number) => formatAxis(v, unit) },
@@ -148,7 +152,7 @@ function stats(i: Item) {
 
 <template>
   <section class="card chart" :aria-label="title">
-    <header>
+    <header v-if="!bare">
       <div>
         <h3>{{ title }}</h3>
         <div v-if="subtitle" class="muted sub">{{ subtitle }}</div>

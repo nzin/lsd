@@ -22,6 +22,7 @@ function nextTheme() { applyTheme(themes[(themes.indexOf(themeChoice.value) + 1)
       <nav aria-label="Main">
         <router-link to="/" :class="{ active: route.path === '/' || route.path.startsWith('/nodes/') }">Metrics</router-link>
         <router-link to="/topology" :class="{ active: route.path === '/topology' }">Topology</router-link>
+        <router-link to="/loop" :class="{ active: route.path === '/loop' }">In loop</router-link>
       </nav>
       <span class="grow"></span>
       <span class="muted num" :title="nodesError ?? ''">
