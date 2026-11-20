@@ -10,5 +10,5 @@ Section: admin
 Priority: optional
 Description: Linux Simple Diagnostic server (metrics storage, API and web UI)
  Receives metrics from Linux Simple Diagnostic agents over gRPC, stores them in
- an embedded time-series database and serves the web UI and API on port 8080.
+ an embedded time-series database and serves the web UI and API on port 8090.
  Installed in /opt/lsd/server and run as a systemd service.

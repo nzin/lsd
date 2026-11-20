@@ -139,7 +139,7 @@ func serverCmd(logLevel *string) *cobra.Command {
 	}
 	f := c.Flags()
 	f.StringVar(&cfg.GRPCAddr, "grpc", env("GRPC_ADDR", ":7070"), "gRPC listen address [LSD_GRPC_ADDR]")
-	f.StringVar(&cfg.HTTPAddr, "http", env("HTTP_ADDR", ":8080"), "HTTP listen address (UI + API) [LSD_HTTP_ADDR]")
+	f.StringVar(&cfg.HTTPAddr, "http", env("HTTP_ADDR", ":8090"), "HTTP listen address (UI + API) [LSD_HTTP_ADDR]")
 	f.StringVar(&cfg.DataDir, "data-dir", env("DATA_DIR", "./data"), "storage directory [LSD_DATA_DIR]")
 	f.DurationVar(&cfg.Retention, "retention", envDur("RETENTION", 30*24*time.Hour), "how long to keep metrics [LSD_RETENTION]")
 	f.StringVar(&cfg.Token, "token", env("TOKEN", ""), "require this bearer token from agents [LSD_TOKEN]")
@@ -171,7 +171,7 @@ func healthcheckCmd() *cobra.Command {
 			return nil
 		},
 	}
-	c.Flags().StringVar(&url, "url", "http://127.0.0.1:8080/healthz", "health endpoint")
+	c.Flags().StringVar(&url, "url", "http://127.0.0.1:8090/healthz", "health endpoint")
 	return c
 }
 

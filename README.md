@@ -34,7 +34,7 @@ agent (each Linux host)                        server
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d --build
-open http://localhost:8080
+open http://localhost:8090
 ```
 
 Two small traffic generators run inside the agents' network namespaces so the topology has something to show:
@@ -55,7 +55,7 @@ Note: the **load average** is always host-wide (the kernel has no per-cgroup loa
 ```bash
 make build                                   # builds the UI, then a static binary in bin/lsd
 
-bin/lsd server --data-dir ./data   # UI+API on :8080, gRPC on :7070
+bin/lsd server --data-dir ./data   # UI+API on :8090, gRPC on :7070
 sudo bin/lsd agent --server <server-host>:7070
 ```
 
@@ -78,7 +78,7 @@ Every flag can also be set as `LSD_<NAME>` (e.g. `LSD_SERVER`, `LSD_INTERVAL`, `
 
 | Server | Default | |
 |---|---|---|
-| `--grpc` / `--http` | `:7070` / `:8080` | listen addresses |
+| `--grpc` / `--http` | `:7070` / `:8090` | listen addresses |
 | `--data-dir` | `./data` | TSDB and node registry |
 | `--retention` | `720h` | how long metrics are kept |
 | `--token`, `--tls-cert`, `--tls-key` | off | require a token from agents; serve gRPC over TLS |
@@ -106,7 +106,7 @@ It works from macOS too (the binary is static; if `dpkg-deb` isn't installed it 
 | Runs as | `lsd` user + `CAP_BPF`, `CAP_NET_ADMIN`, `CAP_PERFMON`, `CAP_SYS_RESOURCE` (to capture its own traffic) | `lsd` user + the same capabilities |
 
 ```bash
-sudo apt install ./lsd-server_0.1.0_amd64.deb          # UI on http://<host>:8080, gRPC on :7070
+sudo apt install ./lsd-server_0.1.0_amd64.deb          # UI on http://<host>:8090, gRPC on :7070
 sudo apt install ./lsd-agent_0.1.0_amd64.deb
 sudoedit /etc/lsd/agent.env                            # set LSD_SERVER=<server-host>:7070
 sudo systemctl restart lsd-agent
@@ -184,7 +184,7 @@ make test-metrics  # checks the CPU / memory numbers against known loads, in a c
 make test-bpf    # runs the real BPF program with BPF_PROG_TEST_RUN (privileged container)
 make generate    # recompile bpf/flows.bpf.c (clang in a container); outputs are committed
 make proto       # regenerate gRPC code (protoc + protoc-gen-go + protoc-gen-go-grpc)
-cd web && npm run dev   # Vite dev server, proxies /api to localhost:8080
+cd web && npm run dev   # Vite dev server, proxies /api to localhost:8090
 ```
 
 Layout: `cmd/lsd` (CLI) · `internal/agent` (collection, eBPF, sender) · `internal/server` (ingest, store, topology, api) · `internal/loadgen` (demo traffic) · `bpf/` (C source) · `proto/` · `web/` (Vue app, embedded into the binary) · `deploy/` (Dockerfile, compose) · `docs/` (installation guide, embedded) · `packaging/` (systemd units, env files and maintainer scripts for the `.deb`s).

@@ -27,7 +27,7 @@ Linux Simple Diagnostic (`lsd`) is one program with two roles:
 
 ```text
  agent (machine A) --+
- agent (machine B) --+-- gRPC :7070 --> server <-- browser :8080
+ agent (machine B) --+-- gRPC :7070 --> server <-- browser :8090
  agent (machine C) --+
 ```
 
@@ -53,7 +53,7 @@ what the numbers mean, and troubleshooting.
 | From | To | Port | Purpose |
 |:--------------|:-------------|:--------|:-------------------------------|
 | agents | server | 7070/tcp | metrics (gRPC) |
-| browsers | server | 8080/tcp | web UI and API |
+| browsers | server | 8090/tcp | web UI and API |
 
 **Agent**
 
@@ -123,7 +123,9 @@ sudo apt install ./lsd-server_0.1.0_amd64.deb
 systemctl status lsd-server
 ```
 
-The web UI is now on `http://<server>:8080` and the agents connect to port 7070.
+The web UI is now on `http://<server>:8090` and the agents connect to port 7070.
+(Before version 1.1.2 the web UI used port 8080. To keep it there after an upgrade,
+set `LSD_HTTP_ADDR=:8080` in `/etc/lsd/server.env`.)
 To change a setting, edit `/etc/lsd/server.env` (see
 [Configuration]) and restart:
 
@@ -183,7 +185,7 @@ tree.
 docker compose -f deploy/docker-compose.yml up -d --build
 ```
 
-Open `http://localhost:8080`. Within about a minute you see two nodes, and on the
+Open `http://localhost:8090`. Within about a minute you see two nodes, and on the
 **Topology** page a thick arrow from agent-1 to agent-2 (about 4 MB/s, changing
 slowly) and a thin one back.
 
@@ -270,7 +272,7 @@ With systemd, put the environment variables in `/etc/lsd/server.env` or
 
 | Flag | Environment variable | Meaning (default) |
 |:--------------------------|:------------------------------|:--------------------------------------|
-| `--http` | `LSD_HTTP_ADDR` | listen address of the UI and API (`:8080`) |
+| `--http` | `LSD_HTTP_ADDR` | listen address of the UI and API (`:8090`) |
 | `--grpc` | `LSD_GRPC_ADDR` | listen address for the agents (`:7070`) |
 | `--data-dir` | `LSD_DATA_DIR` | where metrics are stored (`./data`) |
 | `--retention` | `LSD_RETENTION` | how long metrics are kept (`720h`, 30 days) |
@@ -328,7 +330,7 @@ Good to know:
   `LSD_TLS_KEY`, and set `LSD_TLS=true` on the agents. The certificate must be valid
   for the host name used in `LSD_SERVER`. For a quick test with a self-signed
   certificate only, `LSD_TLS_SKIP_VERIFY=true` turns the check off.
-- **The web UI and API have no login.** Do not expose port 8080 to untrusted
+- **The web UI and API have no login.** Do not expose port 8090 to untrusted
   networks. Restrict it with a firewall, or put a reverse proxy that handles
   authentication and HTTPS in front of it.
 
@@ -343,11 +345,11 @@ By default neither a token nor TLS is enabled.
 On the server machine:
 
 ```bash
-curl http://localhost:8080/healthz          # prints: ok
-curl http://localhost:8080/api/nodes        # one entry per agent
+curl http://localhost:8090/healthz          # prints: ok
+curl http://localhost:8090/api/nodes        # one entry per agent
 ```
 
-In the browser, open `http://<server>:8080`. The top right corner shows how many
+In the browser, open `http://<server>:8090`. The top right corner shows how many
 nodes are online, for example `3/3 nodes online` with two agents (the server counts as a node).
 
 On an agent machine, the log (`journalctl -u lsd-agent`) shows, in this
